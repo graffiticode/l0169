@@ -1,0 +1,36 @@
+{
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/api",
+    "packages/app"
+  ],
+  "scripts": {
+    "update-lang-id": "find packages -type f -name \"*.js\" -o -name \"*.jsx\" -o -name \"*.ts\" -o -name \"*.tsx\" -o -name \"*.json\" -o -name \"*.md\" -o -name \"*.html\" | xargs grep -l \"0169\" | xargs sed -i '' 's/0169/0169/g'",
+    "build": "npm run -w packages/app build && npm run -w packages/api build && npm run build-static",
+    "build-static": "npm run -w packages/api build-lexicon; npm run -w packages/api build-spec",
+    "dev": "npm run -w packages/api dev",
+    "start": "npm run -w packages/api start",
+    "lint": "eslint test/",
+    "lint:fix": "eslint --fix test/",
+    "pack": "rm *.tgz; npm -w packages/app pack",
+    "publish": "npm -w packages/app publish",
+    "gcp:build": "gcloud builds submit --config cloudbuild.yaml --substitutions=COMMIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo 'latest')",
+    "gcp:deploy": "gcloud run deploy l0169 --source . --port 50169 --region us-central1 --platform managed --allow-unauthenticated",
+    "gcp:logs": "gcloud run logs read l0169 --region us-central1"
+  },
+  "devDependencies": {
+    "eslint": "^8.44.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-n": "^16.0.1",
+    "eslint-plugin-promise": "^6.1.1",
+    "jest": "^29.6.1"
+  },
+  "jest": {
+    "testPathIgnorePatterns": [
+      "<rootDir>/packages/",
+      "<rootDir>/node_modules/"
+    ]
+  }
+}

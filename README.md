@@ -1,46 +1,58 @@
 # L0169
 
-L0169 is a **template for creating new Graffiticode languages**. Clone this repository when starting a new language.
+L0169 is a Graffiticode language for authoring **interactive concept web assessment diagrams** — educational tools where students interact with connected concept nodes arranged in a web layout.
 
-## What it provides
+## Vocabulary
 
-L0169 includes example implementations to demonstrate how to build language features:
+| Function | Arity | Description |
+|----------|:-----:|-------------|
+| `topic` | 2 | Sets the concept web topic label |
+| `anchor` | 2 | Defines the central anchor concept |
+| `connections` | 2 | Defines peripheral connections (list) |
+| `connection` | 1 | Defines a single peripheral connection |
+| `text` | 2 | Sets display text for a node |
+| `assess` | 2 | Sets assessment config for a node |
+| `method` | 1 | Sets the assessment method |
+| `expected` | 1 | Sets the expected correct value |
+| `concepts` | 2 | Defines drag-and-drop tray concepts (list) |
+| `concept` | 1 | Defines a single tray concept |
+| `image` | 2 | Sets an image URL for a tray concept |
+| `align` | 2 | Sets tray position (RIGHT, LEFT, TOP, BOTTOM) |
+| `theme` | 2 | Sets the UI theme (dark or light) |
 
-| Function | Purpose |
-|----------|---------|
-| `hello <string>` | Example text output |
-| `theme [dark\|light] <expr>` | Example interactive UI with toggle |
-| `image <url>` | Example image rendering |
+## Example
 
-## Usage
+```
+topic 'Concept Web'
+anchor text 'Hub' assess [method 'value' expected 'Hub'] {}
+connections [
+  connection text 'Foo' assess [method 'value' expected 'Foo'] {},
+  connection text 'Bar' assess [method 'value' expected 'Bar'] {},
+  connection text 'Baz' assess [method 'value' expected 'Baz'] {}
+] {}..
+```
 
-When creating a new Graffiticode language:
-
-1. Clone this repository
-2. Update the port number and language ID
-3. Replace the example functions with your language's vocabulary
-4. Customize the form view for your output rendering needs
-
-The `theme` feature demonstrates how to build interactive UI components - use it as a reference when adding interactivity to your language.
+The anchor is placed at the center of the diagram. Connections are arranged radially around it with solid edges auto-generated from each connection to the anchor.
 
 ## Architecture
 
-- **packages/api** - Node.js/Express backend compiler
-- **packages/app** - React/TypeScript frontend
+- **packages/api** — Node.js/Express backend compiler
+- **packages/app** — React/TypeScript frontend library
 
 Standard Graffiticode compiler pipeline: Checker (validates AST) → Transformer (produces output).
 
-## Related languages
-
-- **L0011** - Production language for form generation (console property editor)
-- **L0012** - Production language for data capture (idempotent value-to-ID mapping)
-
-## Getting started
+## Development
 
 ```bash
-# Install dependencies
 npm install
+npm run dev       # API on port 50169 with Firestore emulator
+npm run build     # Full build (app, API, lexicon, spec)
+```
 
-# Start the API server
-npm start
+## Deployment
+
+```bash
+npm run gcp:build    # Cloud Build
+npm run gcp:deploy   # Direct deploy
+npm run gcp:logs     # View logs
 ```

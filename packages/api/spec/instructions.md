@@ -9,12 +9,13 @@ L0169 is a Graffiticode dialect for authoring interactive concept web assessment
 - Use `connections` with a list of `connection` definitions to define peripheral concepts
 - Use `connection` (arity 1) to define a single peripheral node: `connection text 'Foo' {}`
 - Every connection automatically has a solid edge to the anchor — no explicit edge definitions needed
-- Use `text` to set display text for a node
+- Use `value` to set the scoring value for a concept: `concept value 'Hub' {}`
+- `value` is the default display text; use `text` or `image` to override the display
+- Use `text` to override display text for a node or concept
+- Use `image` to set an image URL on a concept: `concept value 'Hub' image 'https://...' {}`
 - Use `assess` with `method` and `expected` to define assessment criteria
 - Use `theme` to set the visual theme: `theme dark` or `theme light`
 - Use `concepts` with a list of `concept` definitions to create a drag-and-drop tray
-- Use `concept` (arity 1) with `text` or `image`: `concept text 'Answer' {}`
-- Use `image` to set an image URL on a concept: `concept image 'https://...' {}`
 - Use `align` to position the tray: `align RIGHT`, `align LEFT`, `align TOP`, or `align BOTTOM`
 - When using concepts, set node `text` to empty string `''` so students drag concepts to fill them in
 - Add descriptive comments using the pipe symbol `|`
@@ -51,8 +52,9 @@ anchor. No explicit edge definitions are needed.
 To create a drag-and-drop assessment, define `concepts` alongside `anchor` and
 `connections`. Set node text to empty strings and use `assess` with `expected`
 values. Students drag concepts from the tray onto nodes, and assessment validates
-the placed concept's text against the expected value using position-independent
-matching.
+the placed concept's `value` against the expected value using position-independent
+matching. Use `text` or `image` to customize the display independently of the
+scoring value.
 
 ```
 topic 'Fill in the blanks'
@@ -61,7 +63,16 @@ connections [
   connection text '' assess [method 'value' expected 'Spoke'] {}
 ]
 concepts [
-  concept text 'Hub' {},
-  concept text 'Spoke' {}
+  concept value 'Hub' {},
+  concept value 'Spoke' {}
 ] align RIGHT {}..
+```
+
+A concept with an image that scores by value:
+
+```
+concepts [
+  concept value 'Hub' image 'https://example.com/hub.png' {},
+  concept value 'Spoke' image 'https://example.com/spoke.png' {}
+] align RIGHT {}
 ```

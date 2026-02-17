@@ -34,7 +34,8 @@ renders an interactive concept web diagram in the browser view.
 | **anchor**     | 2 | `anchor text 'Hub' {}` | defines the central anchor concept |
 | **connections** | 2 | `connections [connection text 'Foo' {}]` | defines peripheral connections |
 | **connection** | 1 | `connection text 'Foo' {}` | defines a single connection |
-| **text**       | 2 | `text 'Hub'` | sets node display text |
+| **value**      | 2 | `value 'Hub'` | sets scoring value (default display text) |
+| **text**       | 2 | `text 'Hub'` | overrides display text |
 | **assess**     | 2 | `assess [method 'value' expected 'Hub']` | sets node assessment config |
 | **method**     | 1 | `method 'value'` | sets assessment method |
 | **expected**   | 1 | `expected 'Hub'` | sets expected correct value |

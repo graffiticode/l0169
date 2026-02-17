@@ -36,6 +36,14 @@ export class Checker extends BasisChecker {
     });
   }
 
+  VALUE(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        resume([], node);
+      });
+    });
+  }
+
   TEXT(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
@@ -146,6 +154,14 @@ export class Transformer extends BasisTransformer {
   CONNECTION(node, options, resume) {
     this.visit(node.elts[0], options, (e0, v0) => {
       resume([], v0);
+    });
+  }
+
+  VALUE(node, options, resume) {
+    this.visit(node.elts[0], options, (e0, v0) => {
+      this.visit(node.elts[1], options, (e1, v1) => {
+        resume([], { ...v1, value: v0 });
+      });
     });
   }
 

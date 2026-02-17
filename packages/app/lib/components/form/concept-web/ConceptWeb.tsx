@@ -17,6 +17,7 @@ interface ConceptEdge {
 }
 
 interface TrayItem {
+  value?: string;
   text?: string;
   image?: string;
 }
@@ -192,19 +193,30 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
   const handleTrayDragStart = useCallback((e: React.DragEvent, itemIndex: number, item: TrayItem) => {
     e.dataTransfer.setData("application/json", JSON.stringify(itemIndex));
     e.dataTransfer.effectAllowed = "move";
-    // Create a badge-shaped drag image matching the node drag style
+    // Create a circular drag image matching the concept badge
+    const sz = nodeSize;
     const badge = document.createElement("div");
-    badge.textContent = item.text || "";
     badge.style.cssText = `
-      display: inline-flex; align-items: center; border-radius: 9999px;
-      padding: 4px 12px; font-size: 14px; font-weight: 500;
+      display: flex; align-items: center; justify-content: center;
+      width: ${sz}px; height: ${sz}px; border-radius: 50%; box-sizing: border-box;
+      padding: ${4 * scale}px;
       background: ${isDark ? "#1e3a5f" : "#dbeafe"}; color: ${isDark ? "#bfdbfe" : "#1e40af"};
       position: fixed; top: -1000px; left: -1000px;
     `;
+    const span = document.createElement("span");
+    span.textContent = item.text || item.value || "";
+    span.style.cssText = `
+      font-size: ${fontSize}rem; font-weight: 500; text-align: center;
+      line-height: 1.2; overflow: hidden; overflow-wrap: break-word;
+      max-width: ${sz * 0.7}px;
+    `;
+    badge.appendChild(span);
     document.body.appendChild(badge);
-    e.dataTransfer.setDragImage(badge, badge.offsetWidth / 2, badge.offsetHeight / 2);
+    // Force layout reflow so text wraps before snapshot
+    badge.getBoundingClientRect();
+    e.dataTransfer.setDragImage(badge, sz / 2, sz / 2);
     requestAnimationFrame(() => document.body.removeChild(badge));
-  }, [isDark]);
+  }, [isDark, nodeSize, fontSize]);
 
   // Drag a placed item off a node — show a badge as the drag image
   const handleNodeDragStart = useCallback((e: React.DragEvent, key: string) => {
@@ -214,17 +226,28 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
     if (!item) { e.preventDefault(); return; }
     e.dataTransfer.setData("application/json", JSON.stringify(itemIndex));
     e.dataTransfer.effectAllowed = "move";
-    // Create a badge-shaped drag image
+    // Create a circular drag image matching the concept badge
+    const sz = nodeSize;
     const badge = document.createElement("div");
-    badge.textContent = item.text || "";
     badge.style.cssText = `
-      display: inline-flex; align-items: center; border-radius: 9999px;
-      padding: 4px 12px; font-size: 14px; font-weight: 500;
+      display: flex; align-items: center; justify-content: center;
+      width: ${sz}px; height: ${sz}px; border-radius: 50%; box-sizing: border-box;
+      padding: ${4 * scale}px;
       background: ${isDark ? "#1e3a5f" : "#dbeafe"}; color: ${isDark ? "#bfdbfe" : "#1e40af"};
       position: fixed; top: -1000px; left: -1000px;
     `;
+    const span = document.createElement("span");
+    span.textContent = item.text || item.value || "";
+    span.style.cssText = `
+      font-size: ${fontSize}rem; font-weight: 500; text-align: center;
+      line-height: 1.2; overflow: hidden; overflow-wrap: break-word;
+      max-width: ${sz * 0.7}px;
+    `;
+    badge.appendChild(span);
     document.body.appendChild(badge);
-    e.dataTransfer.setDragImage(badge, badge.offsetWidth / 2, badge.offsetHeight / 2);
+    // Force layout reflow so text wraps before snapshot
+    badge.getBoundingClientRect();
+    e.dataTransfer.setDragImage(badge, sz / 2, sz / 2);
     requestAnimationFrame(() => document.body.removeChild(badge));
     // Clear the node immediately but track the item as in-flight
     setDraggingItemIndex(itemIndex);
@@ -233,7 +256,7 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
       delete next[key];
       return next;
     });
-  }, [placedItems, items, isDark]);
+  }, [placedItems, items, isDark, nodeSize, fontSize]);
 
   // Set of placed item indices for muting in the tray (include in-flight item)
   const placedItemIndices = new Set(Object.values(placedItems));
@@ -247,10 +270,12 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
 
   const markerSize = 10 * scale;
 
-  // Determine the display text for an entry (placed item text overrides connection text)
+  // Determine the display text for an entry (placed concept overrides connection text)
+  // For concepts: text or image override display, value is the fallback label
   const getDisplayText = (key: string, data: ConceptConnection): string => {
     if (hasItems && placedItems[key] !== undefined) {
-      return items[placedItems[key]]?.text || "";
+      const item = items[placedItems[key]];
+      return item?.text || item?.value || "";
     }
     return data.text;
   };
@@ -280,13 +305,14 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
         .filter(e => e.data.assess?.expected)
         .map(e => e.data.assess!.expected);
 
-      // Collect placed texts within this group
-      const placedTexts: { key: string; text: string }[] = [];
+      // Collect placed values within this group (use value for scoring, not display text)
+      const placedValues: { key: string; value: string }[] = [];
       for (const entry of groupEntries) {
         if (hasItems && placedItems[entry.key] !== undefined) {
-          placedTexts.push({ key: entry.key, text: items[placedItems[entry.key]]?.text || "" });
+          const item = items[placedItems[entry.key]];
+          placedValues.push({ key: entry.key, value: item?.value || item?.text || "" });
         } else if (!hasItems) {
-          placedTexts.push({ key: entry.key, text: entry.data.text });
+          placedValues.push({ key: entry.key, value: entry.data.text });
         }
       }
 
@@ -294,11 +320,11 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
       const claimed = new Set<string>();
       const correctKeys = new Set<string>();
 
-      for (const pt of placedTexts) {
+      for (const pv of placedValues) {
         for (const exp of expectedValues) {
-          if (!claimed.has(exp) && pt.text === exp) {
+          if (!claimed.has(exp) && pv.value === exp) {
             claimed.add(exp);
-            correctKeys.add(pt.key);
+            correctKeys.add(pv.key);
             break;
           }
         }
@@ -340,7 +366,7 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
             key={index}
             draggable={!isPlaced}
             onDragStart={(e) => handleTrayDragStart(e, index, item)}
-            className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium cursor-grab select-none ${
+            className={`inline-flex items-center justify-center rounded-full font-medium cursor-grab select-none ${
               isPlaced
                 ? (isDark
                     ? "bg-zinc-700 text-zinc-500 cursor-default opacity-50"
@@ -349,17 +375,37 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                     ? "bg-blue-900 text-blue-200"
                     : "bg-blue-100 text-blue-800")
             }`}
+            style={{
+              width: nodeSize,
+              height: nodeSize,
+              fontSize: `${fontSize}rem`,
+              padding: `${4 * scale}px`,
+            }}
           >
             {item.image ? (
               <img
                 src={item.image}
-                alt={item.text || ""}
-                className="h-6 w-6 rounded-full object-cover"
+                alt={item.text || item.value || ""}
+                style={{
+                  width: nodeSize * 0.75,
+                  height: nodeSize * 0.75,
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                }}
                 draggable={false}
               />
             ) : null}
-            {item.text && (
-              <span className={item.image ? "ml-1" : ""}>{item.text}</span>
+            {!item.image && (item.text || item.value) && (
+              <span
+                style={{
+                  color: isDark ? "#bfdbfe" : "#1e40af",
+                  fontSize: `${fontSize}rem`,
+                  textAlign: "center",
+                  lineHeight: 1.2,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >{item.text || item.value}</span>
             )}
           </div>
         );

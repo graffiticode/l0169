@@ -16,7 +16,8 @@ semantics and base library can be found here:
 | `anchor` | `<record record: record>` | Defines the central anchor concept |
 | `connections` | `<list record: record>` | Defines the list of peripheral connections |
 | `connection` | `<record: record>` | Defines a single connection (arity 1) |
-| `text` | `<string record: record>` | Sets display text for a node |
+| `value` | `<string record: record>` | Sets the scoring value (default display text) |
+| `text` | `<string record: record>` | Overrides display text for a node |
 | `assess` | `<list record: record>` | Sets assessment config for a node |
 | `method` | `<string record: record>` | Sets the assessment method |
 | `expected` | `<string record: record>` | Sets the expected correct value |
@@ -63,9 +64,20 @@ and `assess` are passed through the pipeline.
 connection text 'Foo' assess [method 'value' expected 'Foo'] {}
 ```
 
+### value
+
+Sets the scoring value for a concept. This is compared against `expected`
+during assessment. Also serves as the default display text unless overridden
+by `text` or `image`.
+
+```
+value 'Hub'
+```
+
 ### text
 
-Sets the display text for a node.
+Overrides the display text for a node or concept. When set on a concept,
+the `value` is still used for scoring.
 
 ```
 text 'Hub'

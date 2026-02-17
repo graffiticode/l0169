@@ -10,7 +10,8 @@ L0169 is a Graffiticode language for authoring **interactive concept web assessm
 | `anchor` | 2 | Defines the central anchor concept |
 | `connections` | 2 | Defines peripheral connections (list) |
 | `connection` | 1 | Defines a single peripheral connection |
-| `text` | 2 | Sets display text for a node |
+| `value` | 2 | Sets the scoring value (default display text) |
+| `text` | 2 | Overrides display text for a node |
 | `assess` | 2 | Sets assessment config for a node |
 | `method` | 1 | Sets the assessment method |
 | `expected` | 1 | Sets the expected correct value |

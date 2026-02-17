@@ -166,7 +166,8 @@ export class Transformer extends BasisTransformer {
   ASSESS(node, options, resume) {
     this.visit(node.elts[0], options, (e0, v0) => {
       this.visit(node.elts[1], options, (e1, v1) => {
-        resume([], { ...v1, assess: v0[0] });
+        const merged = v0.reduce((acc, item) => ({ ...acc, ...item }), {});
+        resume([], { ...v1, assess: merged });
       });
     });
   }

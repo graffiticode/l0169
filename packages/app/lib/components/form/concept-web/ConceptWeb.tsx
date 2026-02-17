@@ -33,14 +33,20 @@ interface NodePosition {
   y: number;
 }
 
-const NODE_SIZE = 90;
-const PADDING = 20;
+// Base dimensions at a reference width of 500px
+const REF_WIDTH = 500;
+const BASE_NODE_SIZE = 90;
+const BASE_PADDING = 20;
+const BASE_FONT_SIZE = 0.8;
+const BASE_STROKE_WIDTH = 2;
 
 function computePositions(
   nodes: ConceptNode[],
   edges: ConceptEdge[],
   width: number,
-  height: number
+  height: number,
+  nodeSize: number,
+  padding: number,
 ): Record<string, NodePosition> {
   const positions: Record<string, NodePosition> = {};
   if (nodes.length === 0) return positions;
@@ -69,7 +75,7 @@ function computePositions(
 
   // Others radially around it
   const others = nodes.filter(n => n.id !== hubId);
-  const radius = Math.min(cx - NODE_SIZE / 2 - PADDING, cy - NODE_SIZE / 2 - PADDING);
+  const radius = Math.min(cx - nodeSize / 2 - padding, cy - nodeSize / 2 - padding);
   others.forEach((n, i) => {
     const angle = (2 * Math.PI * i) / others.length - Math.PI / 2;
     positions[n.id] = {
@@ -90,29 +96,27 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
   const [positions, setPositions] = useState<Record<string, NodePosition>>({});
   const dragging = useRef<{ id: string; offsetX: number; offsetY: number } | null>(null);
 
+  // Scale factor relative to reference width
+  const scale = size.width > 0 ? size.width / REF_WIDTH : 1;
+  const nodeSize = BASE_NODE_SIZE * scale;
+  const fontSize = BASE_FONT_SIZE * scale;
+  const strokeWidth = BASE_STROKE_WIDTH * scale;
+
   // Measure container and compute initial positions
   useEffect(() => {
     if (!containerRef.current) return;
     const observer = new ResizeObserver((entries) => {
       const { width } = entries[0].contentRect;
       const height = width;
+      const s = width / REF_WIDTH;
+      const ns = BASE_NODE_SIZE * s;
+      const pd = BASE_PADDING * s;
       setSize({ width, height });
-      setPositions(prev => {
-        // Only compute if no positions yet (don't override dragged positions)
-        if (Object.keys(prev).length > 0) return prev;
-        return computePositions(nodes, edges, width, height);
-      });
+      setPositions(computePositions(nodes, edges, width, height, ns, pd));
     });
     observer.observe(containerRef.current);
     return () => observer.disconnect();
   }, [nodes, edges]);
-
-  // Recompute positions when size first becomes available
-  useEffect(() => {
-    if (size.width > 0 && Object.keys(positions).length === 0) {
-      setPositions(computePositions(nodes, edges, size.width, size.height));
-    }
-  }, [size, nodes, edges, positions]);
 
   const handlePointerDown = useCallback((e: React.PointerEvent, nodeId: string) => {
     const pos = positions[nodeId];
@@ -146,6 +150,8 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
   const nodeTextColor = isDark ? "#e4e4e7" : "#18181b";
   const edgeColor = isDark ? "#71717a" : "#a1a1aa";
   const topicColor = isDark ? "#e4e4e7" : "#18181b";
+
+  const markerSize = 10 * scale;
 
   return (
     <div className="flex flex-col gap-2">
@@ -183,13 +189,13 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
             <defs>
               <marker
                 id="arrowhead"
-                markerWidth="10"
-                markerHeight="7"
-                refX="10"
-                refY="3.5"
+                markerWidth={markerSize}
+                markerHeight={markerSize * 0.7}
+                refX={markerSize}
+                refY={markerSize * 0.35}
                 orient="auto"
               >
-                <polygon points="0 0, 10 3.5, 0 7" fill={edgeColor} />
+                <polygon points={`0 0, ${markerSize} ${markerSize * 0.35}, 0 ${markerSize * 0.7}`} fill={edgeColor} />
               </marker>
             </defs>
             {edges.map((edge, i) => {
@@ -206,7 +212,7 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
               const ny = dy / dist;
 
               // Circle radius
-              const r = NODE_SIZE / 2;
+              const r = nodeSize / 2;
 
               const x1 = from.x + nx * r;
               const y1 = from.y + ny * r;
@@ -215,6 +221,8 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
 
               const isDashed = edge.type === "dashed" || edge.type === "dashed-arrow";
               const isArrow = edge.type === "solid-arrow" || edge.type === "dashed-arrow";
+              const dashSize = 6 * scale;
+              const gapSize = 4 * scale;
 
               return (
                 <line
@@ -224,8 +232,8 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                   x2={x2}
                   y2={y2}
                   stroke={edgeColor}
-                  strokeWidth={2}
-                  strokeDasharray={isDashed ? "6 4" : undefined}
+                  strokeWidth={strokeWidth}
+                  strokeDasharray={isDashed ? `${dashSize} ${gapSize}` : undefined}
                   markerEnd={isArrow ? "url(#arrowhead)" : undefined}
                 />
               );
@@ -243,12 +251,12 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
               onPointerDown={(e) => handlePointerDown(e, node.id)}
               style={{
                 position: "absolute",
-                left: pos.x - NODE_SIZE / 2,
-                top: pos.y - NODE_SIZE / 2,
-                width: NODE_SIZE,
-                height: NODE_SIZE,
+                left: pos.x - nodeSize / 2,
+                top: pos.y - nodeSize / 2,
+                width: nodeSize,
+                height: nodeSize,
                 borderRadius: "50%",
-                border: `2px solid ${borderColor}`,
+                border: `${strokeWidth}px solid ${borderColor}`,
                 background: nodeBackground,
                 display: "flex",
                 alignItems: "center",
@@ -256,13 +264,13 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                 cursor: "grab",
                 userSelect: "none",
                 zIndex: 10,
-                padding: "4px",
+                padding: `${4 * scale}px`,
               }}
             >
               <span
                 style={{
                   color: nodeTextColor,
-                  fontSize: "0.8rem",
+                  fontSize: `${fontSize}rem`,
                   textAlign: "center",
                   lineHeight: 1.2,
                   overflow: "hidden",

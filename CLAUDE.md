@@ -40,6 +40,7 @@ Extends `@graffiticode/basis` with L0169-specific `Checker` and `Transformer` cl
 | Function | Description |
 |----------|-------------|
 | `topic` | Topic label at top |
+| `instructions` | Instructions text below the topic (supports markdown) |
 | `edges` | List of edge definitions |
 | `edge` | Connection pattern (e.g., `'H*'`, `'HA'`) |
 | `type` | Edge type: `SOLID`, `DASHED`, `SOLID-ARROW`, `DASHED-ARROW` |

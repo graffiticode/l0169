@@ -6,6 +6,13 @@ export const lexicon = {
     "length": 2,
     "arity": 2
   },
+  "instructions" : {
+    "tk": 1,
+    "name": "INSTRUCTIONS",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
   "anchor" : {
     "tk": 1,
     "name": "ANCHOR",

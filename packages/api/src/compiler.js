@@ -14,6 +14,14 @@ export class Checker extends BasisChecker {
     });
   }
 
+  INSTRUCTIONS(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        resume([], node);
+      });
+    });
+  }
+
   ANCHOR(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
@@ -135,6 +143,14 @@ export class Transformer extends BasisTransformer {
     });
   }
 
+  INSTRUCTIONS(node, options, resume) {
+    this.visit(node.elts[0], options, (e0, v0) => {
+      this.visit(node.elts[1], options, (e1, v1) => {
+        resume([], { ...v1, instructions: v0 });
+      });
+    });
+  }
+
   ANCHOR(node, options, resume) {
     this.visit(node.elts[0], options, (e0, v0) => {
       this.visit(node.elts[1], options, (e1, v1) => {
@@ -241,7 +257,7 @@ export class Transformer extends BasisTransformer {
     this.visit(node.elts[0], options, (e0, v0) => {
       const data = options?.data || {};
       const val = v0.pop();
-      const { topic, connections = [], anchor, concepts = [], align, theme } = val;
+      const { topic, instructions, connections = [], anchor, concepts = [], align, theme } = val;
 
       // Auto-generate edges: each connection connects to the anchor
       const edges = anchor
@@ -250,6 +266,7 @@ export class Transformer extends BasisTransformer {
 
       const conceptWeb = {
         topic: topic || "",
+        instructions: instructions || "",
         anchor,
         connections,
         edges,

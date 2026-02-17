@@ -1,4 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkBreaks from "remark-breaks";
 
 interface AssessConfig {
   method: string;
@@ -24,6 +26,7 @@ interface TrayItem {
 
 interface ConceptWebData {
   topic?: string;
+  instructions?: string;
   anchor?: ConceptConnection;
   connections: ConceptConnection[];
   edges: ConceptEdge[];
@@ -81,8 +84,24 @@ function computePositions(
   return positions;
 }
 
+// Insert blank lines when transitioning out of a list so markdown ends the list
+function preprocessMarkdown(text: string): string {
+  const lines = text.split('\n');
+  const result: string[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    result.push(lines[i]);
+    const isListItem = /^\s*[*\-+]\s/.test(lines[i]) || /^\s*\d+\.\s/.test(lines[i]);
+    const next = lines[i + 1];
+    if (isListItem && next !== undefined && next.trim() !== '' &&
+        !/^\s*[*\-+]\s/.test(next) && !/^\s*\d+\.\s/.test(next)) {
+      result.push('');
+    }
+  }
+  return result.join('\n');
+}
+
 export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
-  const { topic, anchor, connections, edges, concepts: items = [], trayAlign } = conceptWeb;
+  const { topic, instructions, anchor, connections, edges, concepts: items = [], trayAlign } = conceptWeb;
   const isDark = theme === "dark";
   const hasItems = items.length > 0;
 
@@ -415,13 +434,44 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
 
   return (
     <div className="flex flex-col gap-2">
-      {topic && (
-        <h2
-          className="text-lg font-bold text-center"
-          style={{ color: topicColor }}
-        >
-          {topic}
-        </h2>
+      {(topic || instructions) && (
+        <div className="flex flex-col gap-1">
+          {topic && (
+            <div
+              className="text-lg font-bold text-center"
+              style={{ color: topicColor }}
+            >
+              <ReactMarkdown
+                components={{
+                  p: ({children}) => <>{children}</>,
+                }}
+              >
+                {topic}
+              </ReactMarkdown>
+            </div>
+          )}
+          {instructions && (
+            <div
+              className="text-sm text-left font-sans"
+              style={{ color: isDark ? "#a1a1aa" : "#52525b" }}
+            >
+              <ReactMarkdown
+                remarkPlugins={[remarkBreaks]}
+                components={{
+                  h1: ({children}) => <h1 className="text-lg font-bold mb-1">{children}</h1>,
+                  h2: ({children}) => <h2 className="text-base font-bold mb-1">{children}</h2>,
+                  h3: ({children}) => <h3 className="text-sm font-bold mb-1">{children}</h3>,
+                  p: ({children}) => <p className="mb-1">{children}</p>,
+                  ul: ({children}) => <ul className="list-disc pl-5 mb-1 text-left inline-block">{children}</ul>,
+                  ol: ({children}) => <ol className="list-decimal pl-5 mb-1 text-left inline-block">{children}</ol>,
+                  li: ({children}) => <li className="mb-0.5">{children}</li>,
+                }}
+              >
+                {preprocessMarkdown(instructions)}
+              </ReactMarkdown>
+            </div>
+          )}
+        </div>
       )}
       <div
         className="flex"

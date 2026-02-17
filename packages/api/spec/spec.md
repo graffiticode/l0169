@@ -13,6 +13,7 @@ semantics and base library can be found here:
 | Function | Signature | Description |
 | :------- | :-------- | :---------- |
 | `topic` | `<string record: record>` | Sets the concept web topic label |
+| `instructions` | `<string record: record>` | Sets instructions text below the topic |
 | `anchor` | `<record record: record>` | Defines the central anchor concept |
 | `connections` | `<list record: record>` | Defines the list of peripheral connections |
 | `connection` | `<record: record>` | Defines a single connection (arity 1) |
@@ -33,6 +34,24 @@ Sets the topic label displayed above the concept web diagram.
 
 ```
 topic 'Concept Web'
+```
+
+### instructions
+
+Sets instructions text displayed below the topic label. Supports markdown
+formatting for lists and emphasis.
+
+```
+instructions 'Drag the correct concepts onto the matching nodes.'
+```
+
+Multiline with markdown:
+
+```
+instructions `
+- Drag concepts from the tray onto the correct nodes
+- Green means correct, red means incorrect
+`
 ```
 
 ### anchor
@@ -170,10 +189,11 @@ connections [
 ] {}..
 ```
 
-A drag-and-drop concept web with concepts tray:
+A drag-and-drop concept web with concepts tray and instructions:
 
 ```
 topic 'Drag and Drop'
+instructions 'Drag the correct concepts onto the matching nodes.'
 anchor text '' assess [method 'value' expected 'Hub'] {}
 connections [
   connection text '' assess [method 'value' expected 'Foo'] {},

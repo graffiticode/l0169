@@ -5,6 +5,8 @@ L0169 is a Graffiticode dialect for authoring interactive concept web assessment
 ## L0169 Specific Guidelines
 
 - Use `topic` to set the concept web topic: `topic 'Concept Web'`
+- Use `instructions` to provide context or directions below the topic: `instructions 'Drag concepts onto the correct nodes.'`
+- `instructions` supports markdown formatting (lists, emphasis) via backtick strings
 - Use `anchor` to define the central concept placed at the diagram center: `anchor text 'Hub' {}`
 - Use `connections` with a list of `connection` definitions to define peripheral concepts
 - Use `connection` (arity 1) to define a single peripheral node: `connection text 'Foo' {}`
@@ -38,6 +40,7 @@ connections [
 
 Each concept web program defines:
 - **topic**: the assessment heading
+- **instructions**: (optional) context or directions for the learner, displayed below the topic
 - **anchor**: the central concept node placed at the diagram center
 - **connections**: peripheral concept nodes arranged radially around the anchor
 - **concepts**: (optional) drag-and-drop tray concepts that students place onto nodes

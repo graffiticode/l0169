@@ -31,6 +31,7 @@ renders an interactive concept web diagram in the browser view.
 | Function       | Arity | Example | Description |
 | -------------- | :---: | ------- | ----------- |
 | **topic**      | 2 | `topic 'Concept Web'` | sets the topic label |
+| **instructions** | 2 | `instructions 'Drag concepts...'` | sets instructions below the topic |
 | **anchor**     | 2 | `anchor text 'Hub' {}` | defines the central anchor concept |
 | **connections** | 2 | `connections [connection text 'Foo' {}]` | defines peripheral connections |
 | **connection** | 1 | `connection text 'Foo' {}` | defines a single connection |

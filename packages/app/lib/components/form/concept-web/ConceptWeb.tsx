@@ -245,6 +245,16 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
         {nodes.map((node) => {
           const pos = positions[node.id];
           if (!pos) return null;
+
+          let bg = nodeBackground;
+          if (node.assess) {
+            if (node.assess.method === "value" && node.text === node.assess.expected) {
+              bg = isDark ? "#14532d" : "#dcfce7";
+            } else {
+              bg = isDark ? "#7f1d1d" : "#fee2e2";
+            }
+          }
+
           return (
             <div
               key={node.id}
@@ -257,7 +267,7 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                 height: nodeSize,
                 borderRadius: "50%",
                 border: `${strokeWidth}px solid ${borderColor}`,
-                background: nodeBackground,
+                background: bg,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",

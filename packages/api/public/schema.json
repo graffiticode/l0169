@@ -2,12 +2,48 @@
   "$schema": "",
   "$id": "",
   "title": "L0169",
-  "description": "A starter language",
+  "description": "A concept web assessment language",
   "type": "object",
   "properties": {
-    "hello": {
-      "description": "The person, place or thing being greeted",
-      "type": "string",
+    "conceptWeb": {
+      "description": "Concept web diagram data",
+      "type": "object",
+      "properties": {
+        "topic": { "type": "string", "description": "Topic label" },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "description": "Node identifier" },
+              "text": { "type": "string", "description": "Display text" },
+              "assess": {
+                "type": "object",
+                "properties": {
+                  "method": { "type": "string", "description": "Assessment method" },
+                  "expected": { "type": "string", "description": "Expected correct value" }
+                }
+              }
+            },
+            "required": ["id", "text"]
+          },
+          "description": "Concept nodes"
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "from": { "type": "string", "description": "Source node ID" },
+              "to": { "type": "string", "description": "Target node ID" },
+              "type": { "type": "string", "enum": ["solid", "dashed", "solid-arrow", "dashed-arrow"], "description": "Edge type" }
+            },
+            "required": ["from", "to", "type"]
+          },
+          "description": "Connections between nodes"
+        }
+      },
+      "required": ["nodes", "edges"],
       "group": ""
     },
     "theme": {
@@ -15,32 +51,7 @@
       "type": "string",
       "enum": ["light", "dark"],
       "group": ""
-    },
-    "image": {
-      "description": "URL of an image to display",
-      "type": "string",
-      "subtype": "url",
-      "group": ""
     }
   },
-  "definitions": {
-    "hello": {
-      "description": "The person, place or thing being greeted",
-      "type": "string",
-      "group": ""
-    },
-    "theme": {
-      "description": "Light or dark theme",
-      "type": "string",
-      "enum": ["light", "dark"],
-      "group": ""
-    },
-    "image": {
-      "description": "URL of an image to display",
-      "type": "string",
-      "subtype": "url",
-      "group": ""
-    }
-  },
-  "required": ["hello"]
+  "required": []
 }

@@ -5,83 +5,74 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ### Development
-- **Start dev server**: `npm run dev` (starts API server on port 50169 with Firestore emulator)
-- **Build project**: `npm run build` (builds both app and API packages)
-- **Start production**: `npm run start` (starts API server in production mode)
+- **Start dev server**: `npm run dev` (API on port 50169 with Firestore emulator)
+- **Build all**: `npm run build` (builds app, API, lexicon, and spec)
+- **Build lexicon**: `cd packages/api && npm run build-lexicon`
+- **Build spec**: `cd packages/api && npm run build-spec`
 
 ### Linting
-- **Lint code**: `npm run lint` (lints test/ directory at root)
-- **Lint API**: `cd packages/api && npm run lint` (lints API source)
-- **Lint app**: `cd packages/app && npm run lint` (lints app source)
-- **Fix lint errors**: Add `:fix` to any lint command
-
-### Package Management
-- **Build package**: `npm run pack` (creates distributable package)
-- **Publish package**: `npm run publish` (publishes @graffiticode/l0169)
-- **Build lexicon**: `cd packages/api && npm run build-lexicon` (rebuilds language lexicon)
-- **Build spec**: `cd packages/api && npm run build-spec` (builds language specification HTML)
-
-### Testing
-Note: No test runner is currently configured. Test files exist (*.spec.js) but need a test script to be added.
+- **Root**: `npm run lint` (lints test/ directory)
+- **API**: `cd packages/api && npm run lint` (lints src/ and tools/)
+- **App**: `cd packages/app && npm run lint`
+- Append `:fix` to any lint command for auto-fix
 
 ### Deployment
-- **GCP Cloud Build**: `npm run gcp:build` (build and deploy via Cloud Build)
-- **GCP Direct Deploy**: `npm run gcp:deploy` (deploy from source)
+- **Cloud Build**: `npm run gcp:build`
+- **Direct deploy**: `npm run gcp:deploy`
 - **View logs**: `npm run gcp:logs`
+
+### Publishing
+- `npm run pack` — builds distributable @graffiticode/l0169 package
+- `npm run publish` — publishes to npm
 
 ## Architecture
 
-This is a Graffiticode language implementation (L0169) with a monorepo structure using npm workspaces.
+L0169 is a Graffiticode language for authoring **interactive concept web assessment diagrams** — educational tools where students interact with connected concept nodes arranged in a web layout.
 
-### Structure
-- **packages/api/**: Express server providing compilation API and language runtime
-  - Port: 50169 (dev) or process.env.PORT
-  - Auth integration with @graffiticode/auth service
-  - Compiler built on @graffiticode/basis framework
-
-- **packages/app/**: React component library for rendering compiled output
-  - Exports Form component and related UI
-  - Uses SWR for data fetching
-  - Built with Vite, TypeScript, and Tailwind CSS
+Monorepo with npm workspaces: `packages/api` (Express compiler backend) and `packages/app` (React/TypeScript frontend library).
 
 ### Compiler Pipeline (packages/api/src/)
 
-The compiler extends the @graffiticode/basis framework with L0169-specific logic:
+Extends `@graffiticode/basis` with L0169-specific `Checker` and `Transformer` classes in `compiler.js`.
 
-- `compiler.js`: Defines `Checker` and `Transformer` classes extending Basis
-  - Checker validates AST nodes (e.g., THEME tag must be "dark" or "light")
-  - Transformer converts AST to output data objects
-- `compile.js`: API endpoint handler for compilation requests
-- `lexicon.js`: Language vocabulary definitions
+**Lexicon** (`lexicon.js`) defines the language vocabulary (all arity 2):
 
-**Language Functions**:
-| Function | Signature | Description |
-|----------|-----------|-------------|
-| `hello` | `<string>` | Renders "hello, {string}!" message |
-| `theme` | `[dark\|light] <record>` | Sets UI theme with toggle button |
-| `image` | `<string>` | Renders image from URL |
+| Function | Description |
+|----------|-------------|
+| `topic` | Topic label at top |
+| `edges` | List of edge definitions |
+| `edge` | Connection pattern (e.g., `'H*'`, `'HA'`) |
+| `type` | Edge type: `SOLID`, `DASHED`, `SOLID-ARROW`, `DASHED-ARROW` |
+| `nodes` | List of node definitions |
+| `node` | Node ID tag (e.g., `H`, `A`, `B`) |
+| `text` | Display text for node |
+| `assess` | Assessment config (single pipeline item in list) |
+| `method` | Assessment method (e.g., `'value'`) |
+| `expected` | Expected correct value |
+| `theme` | UI theme (`dark` or `light` tag) |
 
-### UI Components (packages/app/lib/)
+The `Transformer.PROG` method expands edge patterns (e.g. `'H*'` → edges from H to every other node) and assembles a `conceptWeb` data structure with resolved nodes and edges.
 
-- `view.jsx`: Main view component managing state and compilation via SWR
-- `components/form/Form.tsx`: Form component with theme support and conditional rendering
-- `lib/api.js`: API client for backend communication
-- `lib/state.js`: Simple reducer-based state management
+**Spec files** (`packages/api/spec/`) — `spec.md` is the language specification, `docs.md` is the user manual, `instructions.md` provides LLM authoring guidelines, `template.gc` is an example program. These are built into `dist/` and served by the API.
+
+### Frontend (packages/app/lib/)
+
+- `view.jsx` — Top-level View component. Manages state via reducer, handles iframe embedding (postMessage), and triggers recompilation via SWR when state changes.
+- `components/form/Form.tsx` — Renders output: dispatches to `ConceptWeb` for concept web data, raw JSON for other data, or error display.
+- `components/form/concept-web/` — Interactive concept web diagram UI: hybrid DOM+SVG with draggable nodes and edge lines.
 
 ### Data Flow
 
 ```
-User Input → State Update → POST /compile → Compiler → Output Data → Form Render → postMessage to parent
+URL params (id, access_token, origin) → View → SWR getData → state.apply("init")
+state.apply("update") → SWR compile → state.apply("compiled") → Form render → postMessage to parent
 ```
 
-The app supports iframe embedding and communicates with parent windows via postMessage.
+### Key Dependencies
+- `@graffiticode/basis` — compiler framework (may be symlinked from `../../../basis` during development)
+- Firestore emulator on port 8080 for local development
 
 ### Environment Variables
-- `PORT`: Server port (default: 50169)
-- `AUTH_URL`: Auth service URL (default: https://auth.graffiticode.org)
-- `NODE_ENV`: Environment (development/production)
-- `FIRESTORE_EMULATOR_HOST`: Local Firestore emulator (dev only, port 8080)
-
-### Dependencies
-- Uses local @graffiticode/basis package (symlinked from ../../../basis)
-- Firestore emulator for development
+- `PORT` (default: 50169)
+- `AUTH_URL` (default: https://auth.graffiticode.org)
+- `FIRESTORE_EMULATOR_HOST` (dev only, set automatically by `npm run dev`)

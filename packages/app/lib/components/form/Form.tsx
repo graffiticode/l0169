@@ -2,6 +2,7 @@ import "../../index.css";
 import { useState, useEffect } from "react";
 
 import { ThemeToggle } from "./ThemeToggle";
+import { ConceptWeb } from "./concept-web";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
@@ -43,10 +44,8 @@ function render({ state }) {
     } else {
       return renderJSON(data.print);
     }
-  } else if (typeof data?.hello === "string") {
-    return <span className="text-sm">{`hello, ${data.hello}!`}</span>;
-  } else if (typeof data.image === "string") {
-    return <img src={data.image} />;
+  } else if (data?.conceptWeb) {
+    return <ConceptWeb conceptWeb={data.conceptWeb} theme={data.theme} />;
   } else {
     return renderJSON(data);
   }

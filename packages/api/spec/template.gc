@@ -1,1 +1,10 @@
-42..
+topic 'Concept Web'
+edges [
+  edge 'H*' type SOLID {}
+]
+nodes [
+  node H text 'Hub' assess [method 'value' expected 'Hub'] {},
+  node A text 'Foo' assess [method 'value' expected 'Foo'] {},
+  node B text 'Bar' assess [method 'value' expected 'Bar'] {},
+  node C text 'Baz' assess [method 'value' expected 'Baz'] {}
+] {}..

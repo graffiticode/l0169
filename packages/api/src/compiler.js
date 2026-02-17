@@ -14,7 +14,7 @@ export class Checker extends BasisChecker {
     });
   }
 
-  EDGES(node, options, resume) {
+  ANCHOR(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         resume([], node);
@@ -22,7 +22,7 @@ export class Checker extends BasisChecker {
     });
   }
 
-  EDGE(node, options, resume) {
+  CONNECTIONS(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         resume([], node);
@@ -30,27 +30,9 @@ export class Checker extends BasisChecker {
     });
   }
 
-  TYPE(node, options, resume) {
+  CONNECTION(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
-      this.visit(node.elts[1], options, async (e1, v1) => {
-        resume([], node);
-      });
-    });
-  }
-
-  NODES(node, options, resume) {
-    this.visit(node.elts[0], options, async (e0, v0) => {
-      this.visit(node.elts[1], options, async (e1, v1) => {
-        resume([], node);
-      });
-    });
-  }
-
-  NODE(node, options, resume) {
-    this.visit(node.elts[0], options, async (e0, v0) => {
-      this.visit(node.elts[1], options, async (e1, v1) => {
-        resume([], node);
-      });
+      resume([], node);
     });
   }
 
@@ -98,6 +80,36 @@ export class Checker extends BasisChecker {
       });
     });
   }
+
+  CONCEPTS(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        resume([], node);
+      });
+    });
+  }
+
+  CONCEPT(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      resume([], node);
+    });
+  }
+
+  IMAGE(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        resume([], node);
+      });
+    });
+  }
+
+  ALIGN(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        resume([], node);
+      });
+    });
+  }
 }
 
 export class Transformer extends BasisTransformer {
@@ -115,43 +127,25 @@ export class Transformer extends BasisTransformer {
     });
   }
 
-  EDGES(node, options, resume) {
+  ANCHOR(node, options, resume) {
     this.visit(node.elts[0], options, (e0, v0) => {
       this.visit(node.elts[1], options, (e1, v1) => {
-        resume([], { ...v1, edges: v0 });
+        resume([], { ...v1, anchor: v0 });
       });
     });
   }
 
-  EDGE(node, options, resume) {
+  CONNECTIONS(node, options, resume) {
     this.visit(node.elts[0], options, (e0, v0) => {
       this.visit(node.elts[1], options, (e1, v1) => {
-        resume([], { pattern: v0, ...v1 });
+        resume([], { ...v1, connections: v0 });
       });
     });
   }
 
-  TYPE(node, options, resume) {
+  CONNECTION(node, options, resume) {
     this.visit(node.elts[0], options, (e0, v0) => {
-      this.visit(node.elts[1], options, (e1, v1) => {
-        resume([], { ...v1, type: v0?.tag?.toLowerCase() || v0 });
-      });
-    });
-  }
-
-  NODES(node, options, resume) {
-    this.visit(node.elts[0], options, (e0, v0) => {
-      this.visit(node.elts[1], options, (e1, v1) => {
-        resume([], { ...v1, nodes: v0 });
-      });
-    });
-  }
-
-  NODE(node, options, resume) {
-    this.visit(node.elts[0], options, (e0, v0) => {
-      this.visit(node.elts[1], options, (e1, v1) => {
-        resume([], { id: v0?.tag || v0, ...v1 });
-      });
+      resume([], v0);
     });
   }
 
@@ -197,39 +191,54 @@ export class Transformer extends BasisTransformer {
     });
   }
 
+  CONCEPTS(node, options, resume) {
+    this.visit(node.elts[0], options, (e0, v0) => {
+      this.visit(node.elts[1], options, (e1, v1) => {
+        resume([], { ...v1, concepts: v0 });
+      });
+    });
+  }
+
+  CONCEPT(node, options, resume) {
+    this.visit(node.elts[0], options, (e0, v0) => {
+      resume([], v0);
+    });
+  }
+
+  IMAGE(node, options, resume) {
+    this.visit(node.elts[0], options, (e0, v0) => {
+      this.visit(node.elts[1], options, (e1, v1) => {
+        resume([], { ...v1, image: v0 });
+      });
+    });
+  }
+
+  ALIGN(node, options, resume) {
+    this.visit(node.elts[0], options, (e0, v0) => {
+      this.visit(node.elts[1], options, (e1, v1) => {
+        resume([], { ...v1, align: v0?.tag?.toLowerCase() || v0 });
+      });
+    });
+  }
+
   PROG(node, options, resume) {
     this.visit(node.elts[0], options, (e0, v0) => {
       const data = options?.data || {};
       const val = v0.pop();
-      const { topic, edges = [], nodes = [], theme } = val;
+      const { topic, connections = [], anchor, concepts = [], align, theme } = val;
 
-      // Build node ID set for wildcard expansion
-      const nodeIds = nodes.map(n => n.id);
-
-      // Expand edge patterns
-      const expandedEdges = [];
-      for (const edgeDef of edges) {
-        const { pattern, type = "line" } = edgeDef;
-        if (pattern && pattern.endsWith("*")) {
-          // Wildcard: e.g. "H*" means from H to every other node
-          const fromId = pattern.slice(0, -1);
-          for (const toId of nodeIds) {
-            if (toId !== fromId) {
-              expandedEdges.push({ from: fromId, to: toId, type });
-            }
-          }
-        } else if (pattern && pattern.length >= 2) {
-          // Explicit pair: e.g. "HA" means H→A
-          const fromId = pattern[0];
-          const toId = pattern.slice(1);
-          expandedEdges.push({ from: fromId, to: toId, type });
-        }
-      }
+      // Auto-generate edges: each connection connects to the anchor
+      const edges = anchor
+        ? connections.map((_, i) => ({ from: "anchor", to: String(i), type: "solid" }))
+        : [];
 
       const conceptWeb = {
         topic: topic || "",
-        nodes,
-        edges: expandedEdges,
+        anchor,
+        connections,
+        edges,
+        concepts,
+        trayAlign: align,
       };
 
       resume(e0, { conceptWeb, theme, ...data });

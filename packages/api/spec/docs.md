@@ -6,9 +6,9 @@
 specific web apps. **L0169** is a *Graffiticode* language for writing
 interactive concept web assessment diagrams.
 
-Concept web assessments present a topic with connected nodes that students
-can drag and rearrange. Nodes are connected by edges (solid or dashed lines, with optional arrowheads)
-defined via patterns.
+Concept web assessments present a topic with a central anchor concept and
+peripheral connections arranged radially around it. Edges from each connection
+to the anchor are generated automatically.
 
 ### Overview
 
@@ -16,13 +16,11 @@ The code
 
 ```
 topic 'Concept Web'
-edges [
-  edge 'H*' type SOLID {}
-]
-nodes [
-  node H text 'Hub' assess [method 'value' expected 'Hub'] {},
-  node A text 'Foo' assess [method 'value' expected 'Foo'] {},
-  node B text 'Bar' assess [method 'value' expected 'Bar'] {}
+anchor text 'Hub' assess [method 'value' expected 'Hub'] {}
+connections [
+  connection text 'Foo' assess [method 'value' expected 'Foo'] {},
+  connection text 'Bar' assess [method 'value' expected 'Bar'] {},
+  connection text 'Baz' assess [method 'value' expected 'Baz'] {}
 ] {}..
 ```
 
@@ -33,15 +31,13 @@ renders an interactive concept web diagram in the browser view.
 | Function       | Arity | Example | Description |
 | -------------- | :---: | ------- | ----------- |
 | **topic**      | 2 | `topic 'Concept Web'` | sets the topic label |
-| **edges**      | 2 | `edges [edge 'H*' type SOLID {}]` | defines edge connections |
-| **edge**       | 2 | `edge 'H*' type SOLID {}` | defines a single edge by pattern |
-| **type**       | 2 | `type SOLID` | sets edge type: SOLID, DASHED, SOLID-ARROW, or DASHED-ARROW |
-| **nodes**      | 2 | `nodes [node H text 'Hub' ...]` | defines concept nodes |
-| **node**       | 2 | `node H text 'Hub' ...` | defines a single node with ID tag |
+| **anchor**     | 2 | `anchor text 'Hub' {}` | defines the central anchor concept |
+| **connections** | 2 | `connections [connection text 'Foo' {}]` | defines peripheral connections |
+| **connection** | 1 | `connection text 'Foo' {}` | defines a single connection |
 | **text**       | 2 | `text 'Hub'` | sets node display text |
 | **assess**     | 2 | `assess [method 'value' expected 'Hub']` | sets node assessment config |
-| **method**     | 2 | `method 'value'` | sets assessment method |
-| **expected**   | 2 | `expected 'Hub'` | sets expected correct value |
+| **method**     | 1 | `method 'value'` | sets assessment method |
+| **expected**   | 1 | `expected 'Hub'` | sets expected correct value |
 | **theme**      | 2 | `theme dark` | sets the UI theme (dark or light) |
 | **val**        | 2 | `val ob "x"` | returns the value of `x` in `ob` |
 | **concat**     | 1 | `concat [x,y]` | returns the concatenation of the values |

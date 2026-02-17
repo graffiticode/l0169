@@ -6,40 +6,26 @@ export const lexicon = {
     "length": 2,
     "arity": 2
   },
-  "edges" : {
+  "anchor" : {
     "tk": 1,
-    "name": "EDGES",
+    "name": "ANCHOR",
     "cls": "function",
     "length": 2,
     "arity": 2
   },
-  "edge" : {
+  "connections" : {
     "tk": 1,
-    "name": "EDGE",
+    "name": "CONNECTIONS",
     "cls": "function",
     "length": 2,
     "arity": 2
   },
-  "type" : {
+  "connection" : {
     "tk": 1,
-    "name": "TYPE",
+    "name": "CONNECTION",
     "cls": "function",
-    "length": 2,
-    "arity": 2
-  },
-  "nodes" : {
-    "tk": 1,
-    "name": "NODES",
-    "cls": "function",
-    "length": 2,
-    "arity": 2
-  },
-  "node" : {
-    "tk": 1,
-    "name": "NODE",
-    "cls": "function",
-    "length": 2,
-    "arity": 2
+    "length": 1,
+    "arity": 1
   },
   "text" : {
     "tk": 1,
@@ -72,6 +58,34 @@ export const lexicon = {
   "theme" : {
     "tk": 1,
     "name": "THEME",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
+  "concepts" : {
+    "tk": 1,
+    "name": "CONCEPTS",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
+  "concept" : {
+    "tk": 1,
+    "name": "CONCEPT",
+    "cls": "function",
+    "length": 1,
+    "arity": 1
+  },
+  "image" : {
+    "tk": 1,
+    "name": "IMAGE",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
+  "align" : {
+    "tk": 1,
+    "name": "ALIGN",
     "cls": "function",
     "length": 2,
     "arity": 2

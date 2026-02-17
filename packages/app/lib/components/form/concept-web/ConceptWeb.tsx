@@ -5,8 +5,7 @@ interface AssessConfig {
   expected: string;
 }
 
-interface ConceptNode {
-  id: string;
+interface ConceptConnection {
   text: string;
   assess?: AssessConfig;
 }
@@ -17,10 +16,18 @@ interface ConceptEdge {
   type: string;
 }
 
+interface TrayItem {
+  text?: string;
+  image?: string;
+}
+
 interface ConceptWebData {
   topic?: string;
-  nodes: ConceptNode[];
+  anchor?: ConceptConnection;
+  connections: ConceptConnection[];
   edges: ConceptEdge[];
+  concepts?: TrayItem[];
+  trayAlign?: string;
 }
 
 interface ConceptWebProps {
@@ -41,66 +48,67 @@ const BASE_FONT_SIZE = 0.8;
 const BASE_STROKE_WIDTH = 2;
 
 function computePositions(
-  nodes: ConceptNode[],
-  edges: ConceptEdge[],
+  anchor: ConceptConnection | undefined,
+  connections: ConceptConnection[],
   width: number,
   height: number,
   nodeSize: number,
   padding: number,
 ): Record<string, NodePosition> {
   const positions: Record<string, NodePosition> = {};
-  if (nodes.length === 0) return positions;
-
-  // Find hub: node with most outgoing edges
-  const outCount: Record<string, number> = {};
-  for (const n of nodes) outCount[n.id] = 0;
-  for (const e of edges) {
-    outCount[e.from] = (outCount[e.from] || 0) + 1;
-  }
-
-  let hubId = nodes[0].id;
-  let maxOut = 0;
-  for (const n of nodes) {
-    if ((outCount[n.id] || 0) > maxOut) {
-      maxOut = outCount[n.id] || 0;
-      hubId = n.id;
-    }
-  }
 
   const cx = width / 2;
   const cy = height / 2;
 
-  // Hub at center
-  positions[hubId] = { x: cx, y: cy };
+  // Place anchor at center
+  if (anchor) {
+    positions["anchor"] = { x: cx, y: cy };
+  }
 
-  // Others radially around it
-  const others = nodes.filter(n => n.id !== hubId);
-  const radius = Math.min(cx - nodeSize / 2 - padding, cy - nodeSize / 2 - padding);
-  others.forEach((n, i) => {
-    const angle = (2 * Math.PI * i) / others.length - Math.PI / 2;
-    positions[n.id] = {
-      x: cx + radius * Math.cos(angle),
-      y: cy + radius * Math.sin(angle),
-    };
-  });
+  // Arrange connections radially
+  if (connections.length > 0) {
+    const radius = Math.min(cx - nodeSize / 2 - padding, cy - nodeSize / 2 - padding);
+    connections.forEach((_, i) => {
+      const angle = (2 * Math.PI * i) / connections.length - Math.PI / 2;
+      positions[String(i)] = {
+        x: cx + radius * Math.cos(angle),
+        y: cy + radius * Math.sin(angle),
+      };
+    });
+  }
 
   return positions;
 }
 
 export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
-  const { topic, nodes, edges } = conceptWeb;
+  const { topic, anchor, connections, edges, concepts: items = [], trayAlign } = conceptWeb;
   const isDark = theme === "dark";
+  const hasItems = items.length > 0;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [positions, setPositions] = useState<Record<string, NodePosition>>({});
   const dragging = useRef<{ id: string; offsetX: number; offsetY: number } | null>(null);
 
+  // Track which items have been placed on which nodes (node key → item index)
+  const [placedItems, setPlacedItems] = useState<Record<string, number>>({});
+  // Track item index currently being dragged off a node
+  const [draggingItemIndex, setDraggingItemIndex] = useState<number | null>(null);
+
   // Scale factor relative to reference width
   const scale = size.width > 0 ? size.width / REF_WIDTH : 1;
   const nodeSize = BASE_NODE_SIZE * scale;
   const fontSize = BASE_FONT_SIZE * scale;
   const strokeWidth = BASE_STROKE_WIDTH * scale;
+
+  // Build all entries for rendering: anchor + connections
+  const allEntries: { key: string; data: ConceptConnection }[] = [];
+  if (anchor) {
+    allEntries.push({ key: "anchor", data: anchor });
+  }
+  connections.forEach((c, i) => {
+    allEntries.push({ key: String(i), data: c });
+  });
 
   // Measure container and compute initial positions
   useEffect(() => {
@@ -112,18 +120,18 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
       const ns = BASE_NODE_SIZE * s;
       const pd = BASE_PADDING * s;
       setSize({ width, height });
-      setPositions(computePositions(nodes, edges, width, height, ns, pd));
+      setPositions(computePositions(anchor, connections, width, height, ns, pd));
     });
     observer.observe(containerRef.current);
     return () => observer.disconnect();
-  }, [nodes, edges]);
+  }, [anchor, connections]);
 
-  const handlePointerDown = useCallback((e: React.PointerEvent, nodeId: string) => {
-    const pos = positions[nodeId];
+  const handlePointerDown = useCallback((e: React.PointerEvent, key: string) => {
+    const pos = positions[key];
     if (!pos || !containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     dragging.current = {
-      id: nodeId,
+      id: key,
       offsetX: e.clientX - rect.left - pos.x,
       offsetY: e.clientY - rect.top - pos.y,
     };
@@ -145,6 +153,92 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
     dragging.current = null;
   }, []);
 
+  // Drag-and-drop handlers for tray items onto nodes
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent, key: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDraggingItemIndex(null);
+    const rawData = e.dataTransfer.getData("application/json");
+    if (!rawData) return;
+    try {
+      const itemIndex: number = JSON.parse(rawData);
+      setPlacedItems(prev => {
+        const next = { ...prev };
+        // Remove this item index from any other node it was on
+        for (const k of Object.keys(next)) {
+          if (next[k] === itemIndex) {
+            delete next[k];
+          }
+        }
+        next[key] = itemIndex;
+        return next;
+      });
+    } catch {
+      // ignore invalid data
+    }
+  }, []);
+
+  // Accept drops anywhere in the layout to prevent browser snap-back animation
+  const handleContainerDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDraggingItemIndex(null);
+  }, []);
+
+  const handleTrayDragStart = useCallback((e: React.DragEvent, itemIndex: number, item: TrayItem) => {
+    e.dataTransfer.setData("application/json", JSON.stringify(itemIndex));
+    e.dataTransfer.effectAllowed = "move";
+    // Create a badge-shaped drag image matching the node drag style
+    const badge = document.createElement("div");
+    badge.textContent = item.text || "";
+    badge.style.cssText = `
+      display: inline-flex; align-items: center; border-radius: 9999px;
+      padding: 4px 12px; font-size: 14px; font-weight: 500;
+      background: ${isDark ? "#1e3a5f" : "#dbeafe"}; color: ${isDark ? "#bfdbfe" : "#1e40af"};
+      position: fixed; top: -1000px; left: -1000px;
+    `;
+    document.body.appendChild(badge);
+    e.dataTransfer.setDragImage(badge, badge.offsetWidth / 2, badge.offsetHeight / 2);
+    requestAnimationFrame(() => document.body.removeChild(badge));
+  }, [isDark]);
+
+  // Drag a placed item off a node — show a badge as the drag image
+  const handleNodeDragStart = useCallback((e: React.DragEvent, key: string) => {
+    const itemIndex = placedItems[key];
+    if (itemIndex === undefined) { e.preventDefault(); return; }
+    const item = items[itemIndex];
+    if (!item) { e.preventDefault(); return; }
+    e.dataTransfer.setData("application/json", JSON.stringify(itemIndex));
+    e.dataTransfer.effectAllowed = "move";
+    // Create a badge-shaped drag image
+    const badge = document.createElement("div");
+    badge.textContent = item.text || "";
+    badge.style.cssText = `
+      display: inline-flex; align-items: center; border-radius: 9999px;
+      padding: 4px 12px; font-size: 14px; font-weight: 500;
+      background: ${isDark ? "#1e3a5f" : "#dbeafe"}; color: ${isDark ? "#bfdbfe" : "#1e40af"};
+      position: fixed; top: -1000px; left: -1000px;
+    `;
+    document.body.appendChild(badge);
+    e.dataTransfer.setDragImage(badge, badge.offsetWidth / 2, badge.offsetHeight / 2);
+    requestAnimationFrame(() => document.body.removeChild(badge));
+    // Clear the node immediately but track the item as in-flight
+    setDraggingItemIndex(itemIndex);
+    setPlacedItems(prev => {
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  }, [placedItems, items, isDark]);
+
+  // Set of placed item indices for muting in the tray (include in-flight item)
+  const placedItemIndices = new Set(Object.values(placedItems));
+  if (draggingItemIndex !== null) placedItemIndices.add(draggingItemIndex);
+
   const borderColor = isDark ? "#71717a" : "#a1a1aa";
   const nodeBackground = isDark ? "#27272a" : "#ffffff";
   const nodeTextColor = isDark ? "#e4e4e7" : "#18181b";
@@ -152,6 +246,126 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
   const topicColor = isDark ? "#e4e4e7" : "#18181b";
 
   const markerSize = 10 * scale;
+
+  // Determine the display text for an entry (placed item text overrides connection text)
+  const getDisplayText = (key: string, data: ConceptConnection): string => {
+    if (hasItems && placedItems[key] !== undefined) {
+      return items[placedItems[key]]?.text || "";
+    }
+    return data.text;
+  };
+
+  // Determine the display image for an entry (placed item image)
+  const getDisplayImage = (key: string): string | undefined => {
+    if (hasItems && placedItems[key] !== undefined) {
+      return items[placedItems[key]]?.image;
+    }
+    return undefined;
+  };
+
+  // Assessment scoring — anchor and connections scored independently
+  const getEntryBackground = (key: string, data: ConceptConnection): string => {
+    if (!data.assess) return nodeBackground;
+
+    if (data.assess.method === "value") {
+      const isAnchor = key === "anchor";
+
+      // Partition entries into anchor vs connection groups
+      const groupEntries = allEntries.filter(e =>
+        isAnchor ? e.key === "anchor" : e.key !== "anchor"
+      );
+
+      // Collect expected values within this group
+      const expectedValues = groupEntries
+        .filter(e => e.data.assess?.expected)
+        .map(e => e.data.assess!.expected);
+
+      // Collect placed texts within this group
+      const placedTexts: { key: string; text: string }[] = [];
+      for (const entry of groupEntries) {
+        if (hasItems && placedItems[entry.key] !== undefined) {
+          placedTexts.push({ key: entry.key, text: items[placedItems[entry.key]]?.text || "" });
+        } else if (!hasItems) {
+          placedTexts.push({ key: entry.key, text: entry.data.text });
+        }
+      }
+
+      // Greedy bipartite matching within the group
+      const claimed = new Set<string>();
+      const correctKeys = new Set<string>();
+
+      for (const pt of placedTexts) {
+        for (const exp of expectedValues) {
+          if (!claimed.has(exp) && pt.text === exp) {
+            claimed.add(exp);
+            correctKeys.add(pt.key);
+            break;
+          }
+        }
+      }
+
+      if (correctKeys.has(key)) {
+        return isDark ? "#14532d" : "#dcfce7";
+      }
+
+      // Only show error color if an item has been placed (or if not using items tray)
+      if (!hasItems || placedItems[key] !== undefined) {
+        return isDark ? "#7f1d1d" : "#fee2e2";
+      }
+    }
+
+    return nodeBackground;
+  };
+
+  // Layout direction based on trayAlign
+  const align = trayAlign || "right";
+  const isHorizontalLayout = align === "left" || align === "right";
+  const outerFlexDir = isHorizontalLayout
+    ? (align === "right" ? "row" : "row-reverse")
+    : (align === "bottom" ? "column" : "column-reverse");
+
+  // Tray component
+  const tray = hasItems ? (
+    <div
+      className={`flex flex-wrap gap-2 p-3 ${isHorizontalLayout ? "flex-col items-start" : "flex-row justify-center"}`}
+      style={{
+        minWidth: isHorizontalLayout ? 120 : undefined,
+        maxWidth: isHorizontalLayout ? 160 : undefined,
+      }}
+    >
+      {items.map((item, index) => {
+        const isPlaced = placedItemIndices.has(index);
+        return (
+          <div
+            key={index}
+            draggable={!isPlaced}
+            onDragStart={(e) => handleTrayDragStart(e, index, item)}
+            className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium cursor-grab select-none ${
+              isPlaced
+                ? (isDark
+                    ? "bg-zinc-700 text-zinc-500 cursor-default opacity-50"
+                    : "bg-gray-200 text-gray-400 cursor-default opacity-50")
+                : (isDark
+                    ? "bg-blue-900 text-blue-200"
+                    : "bg-blue-100 text-blue-800")
+            }`}
+          >
+            {item.image ? (
+              <img
+                src={item.image}
+                alt={item.text || ""}
+                className="h-6 w-6 rounded-full object-cover"
+                draggable={false}
+              />
+            ) : null}
+            {item.text && (
+              <span className={item.image ? "ml-1" : ""}>{item.text}</span>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  ) : null;
 
   return (
     <div className="flex flex-col gap-2">
@@ -164,134 +378,159 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
         </h2>
       )}
       <div
-        ref={containerRef}
-        style={{
-          position: "relative",
-          width: "100%",
-          height: size.height || 300,
-          touchAction: "none",
-        }}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
+        className="flex"
+        style={{ flexDirection: outerFlexDir as any }}
+        onDragOver={hasItems ? handleDragOver : undefined}
+        onDrop={hasItems ? handleContainerDrop : undefined}
       >
-        {/* SVG layer for edges */}
-        {size.width > 0 && (
-          <svg
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              zIndex: 0,
-            }}
-          >
-            <defs>
-              <marker
-                id="arrowhead"
-                markerWidth={markerSize}
-                markerHeight={markerSize * 0.7}
-                refX={markerSize}
-                refY={markerSize * 0.35}
-                orient="auto"
-              >
-                <polygon points={`0 0, ${markerSize} ${markerSize * 0.35}, 0 ${markerSize * 0.7}`} fill={edgeColor} />
-              </marker>
-            </defs>
-            {edges.map((edge, i) => {
-              const from = positions[edge.from];
-              const to = positions[edge.to];
-              if (!from || !to) return null;
-
-              const dx = to.x - from.x;
-              const dy = to.y - from.y;
-              const dist = Math.sqrt(dx * dx + dy * dy);
-              if (dist === 0) return null;
-
-              const nx = dx / dist;
-              const ny = dy / dist;
-
-              // Circle radius
-              const r = nodeSize / 2;
-
-              const x1 = from.x + nx * r;
-              const y1 = from.y + ny * r;
-              const x2 = to.x - nx * r;
-              const y2 = to.y - ny * r;
-
-              const isDashed = edge.type === "dashed" || edge.type === "dashed-arrow";
-              const isArrow = edge.type === "solid-arrow" || edge.type === "dashed-arrow";
-              const dashSize = 6 * scale;
-              const gapSize = 4 * scale;
-
-              return (
-                <line
-                  key={i}
-                  x1={x1}
-                  y1={y1}
-                  x2={x2}
-                  y2={y2}
-                  stroke={edgeColor}
-                  strokeWidth={strokeWidth}
-                  strokeDasharray={isDashed ? `${dashSize} ${gapSize}` : undefined}
-                  markerEnd={isArrow ? "url(#arrowhead)" : undefined}
-                />
-              );
-            })}
-          </svg>
-        )}
-
-        {/* DOM nodes */}
-        {nodes.map((node) => {
-          const pos = positions[node.id];
-          if (!pos) return null;
-
-          let bg = nodeBackground;
-          if (node.assess) {
-            if (node.assess.method === "value" && node.text === node.assess.expected) {
-              bg = isDark ? "#14532d" : "#dcfce7";
-            } else {
-              bg = isDark ? "#7f1d1d" : "#fee2e2";
-            }
-          }
-
-          return (
-            <div
-              key={node.id}
-              onPointerDown={(e) => handlePointerDown(e, node.id)}
+        <div
+          ref={containerRef}
+          style={{
+            position: "relative",
+            width: "100%",
+            flex: isHorizontalLayout ? 1 : "none",
+            height: size.height || 300,
+            touchAction: "none",
+          }}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+        >
+          {/* SVG layer for edges */}
+          {size.width > 0 && (
+            <svg
               style={{
                 position: "absolute",
-                left: pos.x - nodeSize / 2,
-                top: pos.y - nodeSize / 2,
-                width: nodeSize,
-                height: nodeSize,
-                borderRadius: "50%",
-                border: `${strokeWidth}px solid ${borderColor}`,
-                background: bg,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "grab",
-                userSelect: "none",
-                zIndex: 10,
-                padding: `${4 * scale}px`,
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                zIndex: 0,
               }}
             >
-              <span
+              <defs>
+                <marker
+                  id="arrowhead"
+                  markerWidth={markerSize}
+                  markerHeight={markerSize * 0.7}
+                  refX={markerSize}
+                  refY={markerSize * 0.35}
+                  orient="auto"
+                >
+                  <polygon points={`0 0, ${markerSize} ${markerSize * 0.35}, 0 ${markerSize * 0.7}`} fill={edgeColor} />
+                </marker>
+              </defs>
+              {edges.map((edge, i) => {
+                const from = positions[edge.from];
+                const to = positions[edge.to];
+                if (!from || !to) return null;
+
+                const dx = to.x - from.x;
+                const dy = to.y - from.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist === 0) return null;
+
+                const nx = dx / dist;
+                const ny = dy / dist;
+
+                // Circle radius
+                const r = nodeSize / 2;
+
+                const x1 = from.x + nx * r;
+                const y1 = from.y + ny * r;
+                const x2 = to.x - nx * r;
+                const y2 = to.y - ny * r;
+
+                const isDashed = edge.type === "dashed" || edge.type === "dashed-arrow";
+                const isArrow = edge.type === "solid-arrow" || edge.type === "dashed-arrow";
+                const dashSize = 6 * scale;
+                const gapSize = 4 * scale;
+
+                return (
+                  <line
+                    key={i}
+                    x1={x1}
+                    y1={y1}
+                    x2={x2}
+                    y2={y2}
+                    stroke={edgeColor}
+                    strokeWidth={strokeWidth}
+                    strokeDasharray={isDashed ? `${dashSize} ${gapSize}` : undefined}
+                    markerEnd={isArrow ? "url(#arrowhead)" : undefined}
+                  />
+                );
+              })}
+            </svg>
+          )}
+
+          {/* DOM nodes */}
+          {allEntries.map(({ key, data }) => {
+            const pos = positions[key];
+            if (!pos) return null;
+
+            const bg = getEntryBackground(key, data);
+            const displayText = getDisplayText(key, data);
+            const displayImage = getDisplayImage(key);
+            const hasPlacedItem = hasItems && placedItems[key] !== undefined;
+            // Only allow repositioning if the node is empty (no placed item)
+            const canReposition = !hasItems || !hasPlacedItem;
+
+            return (
+              <div
+                key={key}
+                draggable={hasPlacedItem}
+                onDragStart={hasPlacedItem ? (e) => handleNodeDragStart(e, key) : undefined}
+                onPointerDown={canReposition ? (e) => handlePointerDown(e, key) : undefined}
+                onDragOver={hasItems ? handleDragOver : undefined}
+                onDrop={hasItems ? (e) => handleDrop(e, key) : undefined}
                 style={{
-                  color: nodeTextColor,
-                  fontSize: `${fontSize}rem`,
-                  textAlign: "center",
-                  lineHeight: 1.2,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
+                  position: "absolute",
+                  left: pos.x - nodeSize / 2,
+                  top: pos.y - nodeSize / 2,
+                  width: nodeSize,
+                  height: nodeSize,
+                  borderRadius: "50%",
+                  border: `${strokeWidth}px solid ${borderColor}`,
+                  background: bg,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: hasPlacedItem ? "grab" : (canReposition ? "grab" : "default"),
+                  userSelect: "none",
+                  zIndex: 10,
+                  padding: `${4 * scale}px`,
                 }}
               >
-                {node.text}
-              </span>
-            </div>
-          );
-        })}
+                {displayImage ? (
+                  <img
+                    src={displayImage}
+                    alt={displayText}
+                    style={{
+                      maxWidth: nodeSize * 0.7,
+                      maxHeight: nodeSize * 0.7,
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                    }}
+                    draggable={false}
+                  />
+                ) : (
+                  <span
+                    style={{
+                      color: nodeTextColor,
+                      fontSize: `${fontSize}rem`,
+                      textAlign: "center",
+                      lineHeight: 1.2,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {displayText}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        {tray}
       </div>
     </div>
   );

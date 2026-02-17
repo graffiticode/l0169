@@ -13,16 +13,18 @@ semantics and base library can be found here:
 | Function | Signature | Description |
 | :------- | :-------- | :---------- |
 | `topic` | `<string record: record>` | Sets the concept web topic label |
-| `edges` | `<list record: record>` | Defines the list of edge connections |
-| `edge` | `<string record: record>` | Defines a single edge by pattern (e.g. `'H*'`, `'HA'`) |
-| `type` | `<[SOLID\|DASHED\|SOLID-ARROW\|DASHED-ARROW] record: record>` | Sets the edge type |
-| `nodes` | `<list record: record>` | Defines the list of concept nodes |
-| `node` | `<tag record: record>` | Defines a single node with an ID tag |
+| `anchor` | `<record record: record>` | Defines the central anchor concept |
+| `connections` | `<list record: record>` | Defines the list of peripheral connections |
+| `connection` | `<record: record>` | Defines a single connection (arity 1) |
 | `text` | `<string record: record>` | Sets display text for a node |
 | `assess` | `<list record: record>` | Sets assessment config for a node |
 | `method` | `<string record: record>` | Sets the assessment method |
 | `expected` | `<string record: record>` | Sets the expected correct value |
 | `theme` | `<[dark\|light] record: record>` | Sets the UI theme |
+| `concepts` | `<list record: record>` | Defines a list of tray concepts for drag-and-drop |
+| `concept` | `<record: record>` | Defines a single tray concept (arity 1) |
+| `image` | `<string record: record>` | Sets an image URL for a tray item |
+| `align` | `<[RIGHT\|LEFT\|TOP\|BOTTOM] record: record>` | Sets tray position relative to diagram |
 
 ### topic
 
@@ -32,52 +34,33 @@ Sets the topic label displayed above the concept web diagram.
 topic 'Concept Web'
 ```
 
-### edges
+### anchor
 
-Defines a list of edge connection patterns.
-
-```
-edges [
-  edge 'H*' type SOLID {}
-]
-```
-
-### edge
-
-Defines a single edge by a pattern string. Patterns use node IDs:
-
- - `'H*'` — connect node H to every other node (wildcard)
- - `'HA'` — connect node H to node A (explicit)
+Defines the central anchor concept placed at the center of the diagram.
+Every connection automatically has a solid edge to the anchor.
 
 ```
-edge 'H*' type SOLID {}
+anchor text 'Hub' {}
 ```
 
-### type
+### connections
 
-Sets the edge display type. Accepted tags: `SOLID` (solid line), `DASHED` (dashed line), `SOLID-ARROW` (solid line with arrowhead), `DASHED-ARROW` (dashed line with arrowhead).
-
-```
-type SOLID
-```
-
-### nodes
-
-Defines a list of concept nodes.
+Defines a list of peripheral connection nodes arranged radially around the anchor.
 
 ```
-nodes [
-  node H text 'Hub' assess [method 'value' expected 'Hub'] {},
-  node A text 'Foo' assess [method 'value' expected 'Foo'] {}
-]
+connections [
+  connection text 'Foo' {},
+  connection text 'Bar' {}
+] {}
 ```
 
-### node
+### connection
 
-Defines a single concept node with an ID tag (e.g. `H`, `A`, `B`).
+Defines a single peripheral connection (arity 1). Properties like `text`
+and `assess` are passed through the pipeline.
 
 ```
-node H text 'Hub' assess [method 'value' expected 'Hub'] {}
+connection text 'Foo' assess [method 'value' expected 'Foo'] {}
 ```
 
 ### text
@@ -113,6 +96,45 @@ Sets the expected correct value for assessment.
 expected 'Hub'
 ```
 
+### concepts
+
+Defines a list of tray concepts that students can drag onto concept web nodes.
+Concepts render as badges in a tray alongside the diagram.
+
+```
+concepts [
+  concept text 'Answer A' {},
+  concept text 'Answer B' {}
+] align RIGHT {}
+```
+
+### concept
+
+Defines a single tray concept (arity 1). Properties like `text` and `image`
+are passed through the pipeline.
+
+```
+concept text 'Answer A' {}
+```
+
+### image
+
+Sets an image URL for a tray concept. The image is displayed in the badge and
+on the node when the concept is dropped.
+
+```
+concept image 'https://example.com/img.png' {}
+```
+
+### align
+
+Sets the tray position relative to the concept web diagram. Accepted tags:
+`RIGHT` (default), `LEFT`, `TOP`, `BOTTOM`.
+
+```
+align RIGHT
+```
+
 ### theme
 
 Select a theme and render the theme toggle button to allow users to set the
@@ -128,13 +150,26 @@ A complete concept web assessment:
 
 ```
 topic 'Concept Web'
-edges [
-  edge 'H*' type SOLID {}
-]
-nodes [
-  node H text 'Hub' assess [method 'value' expected 'Hub'] {},
-  node A text 'Foo' assess [method 'value' expected 'Foo'] {},
-  node B text 'Bar' assess [method 'value' expected 'Bar'] {},
-  node C text 'Baz' assess [method 'value' expected 'Baz'] {}
+anchor text 'Hub' assess [method 'value' expected 'Hub'] {}
+connections [
+  connection text 'Foo' assess [method 'value' expected 'Foo'] {},
+  connection text 'Bar' assess [method 'value' expected 'Bar'] {},
+  connection text 'Baz' assess [method 'value' expected 'Baz'] {}
 ] {}..
+```
+
+A drag-and-drop concept web with concepts tray:
+
+```
+topic 'Drag and Drop'
+anchor text '' assess [method 'value' expected 'Hub'] {}
+connections [
+  connection text '' assess [method 'value' expected 'Foo'] {},
+  connection text '' assess [method 'value' expected 'Bar'] {}
+]
+concepts [
+  concept text 'Hub' {},
+  concept text 'Foo' {},
+  concept text 'Bar' {}
+] align RIGHT {}..
 ```

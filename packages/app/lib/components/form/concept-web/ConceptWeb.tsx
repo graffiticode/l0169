@@ -115,6 +115,18 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
   // Track item index currently being dragged off a node
   const [draggingItemIndex, setDraggingItemIndex] = useState<number | null>(null);
 
+  // Preload images so they're available instantly for drag badges
+  const preloadedImages = useRef<Record<number, HTMLImageElement>>({});
+  useEffect(() => {
+    items.forEach((item, i) => {
+      if (item.image && !preloadedImages.current[i]) {
+        const img = new Image();
+        img.src = item.image;
+        preloadedImages.current[i] = img;
+      }
+    });
+  }, [items]);
+
   // Scale factor relative to reference width
   const scale = size.width > 0 ? size.width / REF_WIDTH : 1;
   const nodeSize = BASE_NODE_SIZE * scale;
@@ -209,18 +221,42 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
     setDraggingItemIndex(null);
   }, []);
 
-  const handleTrayDragStart = useCallback((e: React.DragEvent, itemIndex: number, item: TrayItem) => {
-    e.dataTransfer.setData("application/json", JSON.stringify(itemIndex));
-    e.dataTransfer.effectAllowed = "move";
-    // Create a circular drag image matching the concept badge
-    const sz = nodeSize;
+  const createDragBadge = useCallback((item: TrayItem, itemIndex: number, sz: number) => {
+    const preloaded = preloadedImages.current[itemIndex];
+    if (item.image && preloaded && preloaded.complete) {
+      // Use canvas for images — renders synchronously for drag snapshot
+      const dpr = window.devicePixelRatio || 1;
+      const canvas = document.createElement("canvas");
+      canvas.width = sz * dpr;
+      canvas.height = sz * dpr;
+      canvas.style.cssText = `width: ${sz}px; height: ${sz}px; position: fixed; top: -1000px; left: -1000px;`;
+      const ctx = canvas.getContext("2d")!;
+      ctx.scale(dpr, dpr);
+      // Draw circular background
+      const bg = isDark ? "#1e3a5f" : "#dbeafe";
+      ctx.beginPath();
+      ctx.arc(sz / 2, sz / 2, sz / 2, 0, Math.PI * 2);
+      ctx.fillStyle = bg;
+      ctx.fill();
+      // Clip and draw image centered
+      ctx.save();
+      const imgSz = sz * 0.75;
+      const offset = (sz - imgSz) / 2;
+      ctx.beginPath();
+      ctx.arc(sz / 2, sz / 2, imgSz / 2, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.drawImage(preloaded, offset, offset, imgSz, imgSz);
+      ctx.restore();
+      return canvas;
+    }
+    // Fallback: text badge
     const badge = document.createElement("div");
     badge.style.cssText = `
       display: flex; align-items: center; justify-content: center;
       width: ${sz}px; height: ${sz}px; border-radius: 50%; box-sizing: border-box;
       padding: ${4 * scale}px;
       background: ${isDark ? "#1e3a5f" : "#dbeafe"}; color: ${isDark ? "#bfdbfe" : "#1e40af"};
-      position: fixed; top: -1000px; left: -1000px;
+      position: fixed; top: -1000px; left: -1000px; overflow: hidden;
     `;
     const span = document.createElement("span");
     span.textContent = item.text || item.value || "";
@@ -230,12 +266,19 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
       max-width: ${sz * 0.7}px;
     `;
     badge.appendChild(span);
+    return badge;
+  }, [isDark, fontSize, scale]);
+
+  const handleTrayDragStart = useCallback((e: React.DragEvent, itemIndex: number, item: TrayItem) => {
+    e.dataTransfer.setData("application/json", JSON.stringify(itemIndex));
+    e.dataTransfer.effectAllowed = "move";
+    const sz = nodeSize;
+    const badge = createDragBadge(item, itemIndex, sz);
     document.body.appendChild(badge);
-    // Force layout reflow so text wraps before snapshot
     badge.getBoundingClientRect();
     e.dataTransfer.setDragImage(badge, sz / 2, sz / 2);
     requestAnimationFrame(() => document.body.removeChild(badge));
-  }, [isDark, nodeSize, fontSize]);
+  }, [nodeSize, createDragBadge]);
 
   // Drag a placed item off a node — show a badge as the drag image
   const handleNodeDragStart = useCallback((e: React.DragEvent, key: string) => {
@@ -245,26 +288,9 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
     if (!item) { e.preventDefault(); return; }
     e.dataTransfer.setData("application/json", JSON.stringify(itemIndex));
     e.dataTransfer.effectAllowed = "move";
-    // Create a circular drag image matching the concept badge
     const sz = nodeSize;
-    const badge = document.createElement("div");
-    badge.style.cssText = `
-      display: flex; align-items: center; justify-content: center;
-      width: ${sz}px; height: ${sz}px; border-radius: 50%; box-sizing: border-box;
-      padding: ${4 * scale}px;
-      background: ${isDark ? "#1e3a5f" : "#dbeafe"}; color: ${isDark ? "#bfdbfe" : "#1e40af"};
-      position: fixed; top: -1000px; left: -1000px;
-    `;
-    const span = document.createElement("span");
-    span.textContent = item.text || item.value || "";
-    span.style.cssText = `
-      font-size: ${fontSize}rem; font-weight: 500; text-align: center;
-      line-height: 1.2; overflow: hidden; overflow-wrap: break-word;
-      max-width: ${sz * 0.7}px;
-    `;
-    badge.appendChild(span);
+    const badge = createDragBadge(item, itemIndex, sz);
     document.body.appendChild(badge);
-    // Force layout reflow so text wraps before snapshot
     badge.getBoundingClientRect();
     e.dataTransfer.setDragImage(badge, sz / 2, sz / 2);
     requestAnimationFrame(() => document.body.removeChild(badge));
@@ -275,7 +301,7 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
       delete next[key];
       return next;
     });
-  }, [placedItems, items, isDark, nodeSize, fontSize]);
+  }, [placedItems, items, nodeSize, createDragBadge]);
 
   // Set of placed item indices for muting in the tray (include in-flight item)
   const placedItemIndices = new Set(Object.values(placedItems));
@@ -395,10 +421,10 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                     : "bg-blue-100 text-blue-800")
             }`}
             style={{
-              width: nodeSize,
-              height: nodeSize,
-              fontSize: `${fontSize}rem`,
-              padding: `${4 * scale}px`,
+              width: nodeSize * 0.75,
+              height: nodeSize * 0.75,
+              fontSize: `${fontSize * 0.75}rem`,
+              padding: `${3 * scale}px`,
             }}
           >
             {item.image ? (
@@ -406,8 +432,8 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                 src={item.image}
                 alt={item.text || item.value || ""}
                 style={{
-                  width: nodeSize * 0.75,
-                  height: nodeSize * 0.75,
+                  width: nodeSize * 0.75 * 0.75,
+                  height: nodeSize * 0.75 * 0.75,
                   borderRadius: "50%",
                   objectFit: "cover",
                 }}
@@ -418,7 +444,7 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
               <span
                 style={{
                   color: isDark ? "#bfdbfe" : "#1e40af",
-                  fontSize: `${fontSize}rem`,
+                  fontSize: `${fontSize * 0.75}rem`,
                   textAlign: "center",
                   lineHeight: 1.2,
                   overflow: "hidden",

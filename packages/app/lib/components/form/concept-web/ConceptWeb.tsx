@@ -453,7 +453,7 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
           {instructions && (
             <div
               className="text-sm text-left font-sans"
-              style={{ color: isDark ? "#a1a1aa" : "#52525b" }}
+              style={{ color: isDark ? "#a1a1aa" : "#52525b", paddingLeft: "25%", paddingRight: "25%" }}
             >
               <ReactMarkdown
                 remarkPlugins={[remarkBreaks]}

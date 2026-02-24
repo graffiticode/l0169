@@ -361,14 +361,15 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
         }
       }
 
-      // Greedy bipartite matching within the group
-      const claimed = new Set<string>();
+      // Greedy bipartite matching within the group (track by index so
+      // duplicate expected values each match independently)
+      const claimed = new Set<number>();
       const correctKeys = new Set<string>();
 
       for (const pv of placedValues) {
-        for (const exp of expectedValues) {
-          if (!claimed.has(exp) && pv.value === exp) {
-            claimed.add(exp);
+        for (let i = 0; i < expectedValues.length; i++) {
+          if (!claimed.has(i) && pv.value === expectedValues[i]) {
+            claimed.add(i);
             correctKeys.add(pv.key);
             break;
           }

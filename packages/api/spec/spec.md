@@ -20,9 +20,9 @@ semantics and base library can be found here:
 | `value` | `<string record: record>` | Sets the scoring value (default display text) |
 | `text` | `<string record: record>` | Overrides display text for a node |
 | `assess` | `<list record: record>` | Sets assessment config for a node |
-| `method` | `<string record: record>` | Sets the assessment method |
-| `expected` | `<string record: record>` | Sets the expected correct value |
-| `theme` | `<[dark\|light] record: record>` | Sets the UI theme |
+| `method` | `<string\|VALUE: record>` | Sets the assessment method |
+| `expected` | `<string: record>` | Sets the expected correct value |
+| `theme` | `<[DARK\|LIGHT] record: record>` | Sets the UI theme |
 | `concepts` | `<list record: record>` | Defines a list of tray concepts for drag-and-drop |
 | `concept` | `<record: record>` | Defines a single tray concept (arity 1) |
 | `image` | `<string record: record>` | Sets an image URL for a tray item |
@@ -113,10 +113,12 @@ assess [method 'value' expected 'Hub']
 
 ### method
 
-Sets the assessment method (e.g. `'value'` for text matching).
+Sets the assessment method. Accepts either the string `'value'` or the tag
+`VALUE`. Both are normalized to the string `"value"` in the compiled output.
 
 ```
 method 'value'
+method VALUE
 ```
 
 ### expected
@@ -169,10 +171,10 @@ align RIGHT
 ### theme
 
 Select a theme and render the theme toggle button to allow users to set the
-theme. The tag values `dark` and `light` are the only accepted argument values.
+theme. The tag values `DARK` and `LIGHT` are the only accepted argument values.
 
 ```
-theme dark
+theme DARK
 ```
 
 ## Program Examples

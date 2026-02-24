@@ -16,7 +16,7 @@ function renderErrors(errors: { message: string; from: number; to: number }[], t
           key={i}
           className={classNames(
             "rounded-md p-3 border text-sm",
-            theme === "dark"
+            theme === "DARK"
               ? "bg-red-900/50 border-red-700 text-red-200"
               : "bg-red-50 border-red-200 text-red-800"
           )}
@@ -65,7 +65,7 @@ export const Form = ({ state }) => {
   return (
     <div
       className={classNames(
-        theme === "dark" && "bg-zinc-900 text-white" || "bg-white text-zinc-900",
+        theme === "DARK" && "bg-zinc-900 text-white" || "bg-white text-zinc-900",
         "rounded-md font-mono flex flex-col gap-4 p-4"
       )}
     >

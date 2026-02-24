@@ -102,7 +102,7 @@ function preprocessMarkdown(text: string): string {
 
 export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
   const { topic, instructions, anchor, connections, edges, concepts: items = [], trayAlign } = conceptWeb;
-  const isDark = theme === "dark";
+  const isDark = theme === "DARK";
   const hasItems = items.length > 0;
 
   const containerRef = useRef<HTMLDivElement>(null);

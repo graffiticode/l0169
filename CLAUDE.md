@@ -35,26 +35,29 @@ Monorepo with npm workspaces: `packages/api` (Express compiler backend) and `pac
 
 Extends `@graffiticode/basis` with L0169-specific `Checker` and `Transformer` classes in `compiler.js`.
 
-**Lexicon** (`lexicon.js`) defines the language vocabulary (all arity 2):
+**Lexicon** (`lexicon.js`) defines the language vocabulary:
 
-| Function | Description |
-|----------|-------------|
-| `topic` | Topic label at top |
-| `instructions` | Instructions text below the topic (supports markdown) |
-| `edges` | List of edge definitions |
-| `edge` | Connection pattern (e.g., `'H*'`, `'HA'`) |
-| `type` | Edge type: `SOLID`, `DASHED`, `SOLID-ARROW`, `DASHED-ARROW` |
-| `nodes` | List of node definitions |
-| `node` | Node ID tag (e.g., `H`, `A`, `B`) |
-| `text` | Display text for node |
-| `assess` | Assessment config (single pipeline item in list) |
-| `method` | Assessment method (e.g., `'value'`) |
-| `expected` | Expected correct value |
-| `theme` | UI theme (`dark` or `light` tag) |
+| Function | Arity | Description |
+|----------|:-----:|-------------|
+| `topic` | 2 | Topic label at top |
+| `instructions` | 2 | Instructions text below the topic (supports markdown) |
+| `anchor` | 2 | Central anchor concept at diagram center |
+| `connections` | 2 | List of peripheral connection definitions |
+| `connection` | 1 | Single peripheral connection |
+| `value` | 2 | Scoring value (default display text) |
+| `text` | 2 | Display text override for node or concept |
+| `assess` | 2 | Assessment config (pipeline of method + expected) |
+| `method` | 1 | Assessment method (`'value'` or `VALUE` tag) |
+| `expected` | 1 | Expected correct value |
+| `theme` | 2 | UI theme (`DARK` or `LIGHT` tag) |
+| `concepts` | 2 | List of drag-and-drop tray concepts |
+| `concept` | 1 | Single tray concept |
+| `image` | 2 | Image URL for a tray concept |
+| `align` | 2 | Tray position: `RIGHT`, `LEFT`, `TOP`, `BOTTOM` |
 
-The `Transformer.PROG` method expands edge patterns (e.g. `'H*'` → edges from H to every other node) and assembles a `conceptWeb` data structure with resolved nodes and edges.
+The `Transformer.PROG` method auto-generates solid edges from each connection to the anchor and assembles a `conceptWeb` data structure with topic, instructions, anchor, connections, edges, concepts, and trayAlign.
 
-**Spec files** (`packages/api/spec/`) — `spec.md` is the language specification, `docs.md` is the user manual, `instructions.md` provides LLM authoring guidelines, `template.gc` is an example program. These are built into `dist/` and served by the API.
+**Spec files** (`packages/api/spec/`) — `spec.md` is the language specification, `instructions.md` provides LLM authoring guidelines, `template.gc` is an example program. These are built into `dist/` and served by the API.
 
 ### Frontend (packages/app/lib/)
 

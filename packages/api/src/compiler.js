@@ -70,7 +70,17 @@ export class Checker extends BasisChecker {
 
   METHOD(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
-      resume([], node);
+      const val = typeof v0 === "string" ? v0 : v0.tag;
+      if (val === "value" || val === "VALUE") {
+        resume([], node);
+      } else {
+        const node0 = this.nodePool[node.elts[0]];
+        const err = [{
+          message: `Expecting 'value' or tag VALUE. Got ${v0.tag && "tag " + v0.tag || JSON.stringify(v0)}.`,
+          ...node0.coord,
+        }];
+        resume(err, node);
+      }
     });
   }
 
@@ -84,11 +94,11 @@ export class Checker extends BasisChecker {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const node0 = this.nodePool[node.elts[0]]
-        if (v0.tag === "dark" || v0.tag === "light") {
+        if (v0.tag === "DARK" || v0.tag === "LIGHT") {
           resume([], node);
         } else {
           const err = [{
-            message: `Expecting a tag dark or tag light. Got ${v0.tag && "tag " + v0.tag || v0}.`,
+            message: `Expecting a tag DARK or tag LIGHT. Got ${v0.tag && "tag " + v0.tag || v0}.`,
             ...node0.coord,
           }];
           resume(err, node);
@@ -200,7 +210,8 @@ export class Transformer extends BasisTransformer {
 
   METHOD(node, options, resume) {
     this.visit(node.elts[0], options, (e0, v0) => {
-      resume([], { method: v0 });
+      const method = v0.tag ? v0.tag.toLowerCase() : v0;
+      resume([], { method });
     });
   }
 

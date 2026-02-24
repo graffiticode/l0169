@@ -16,7 +16,7 @@ L0169 is a Graffiticode dialect for authoring interactive concept web assessment
 - Use `text` to override display text for a node or concept
 - Use `image` to set an image URL on a concept: `concept value 'Hub' image 'https://...' {}`
 - Use `assess` with `method` and `expected` to define assessment criteria
-- Use `theme` to set the visual theme: `theme dark` or `theme light`
+- Use `theme` to set the visual theme: `theme DARK` or `theme LIGHT`
 - Use `concepts` with a list of `concept` definitions to create a drag-and-drop tray
 - Use `align` to position the tray: `align RIGHT`, `align LEFT`, `align TOP`, or `align BOTTOM`
 - When using concepts, set node `text` to empty string `''` so students drag concepts to fill them in
@@ -45,7 +45,7 @@ Each concept web program defines:
 - **connections**: peripheral concept nodes arranged radially around the anchor
 - **concepts**: (optional) drag-and-drop tray concepts that students place onto nodes
 - **align**: (optional) tray position — `RIGHT` (default), `LEFT`, `TOP`, `BOTTOM`
-- **theme**: light or dark visual theme
+- **theme**: `LIGHT` or `DARK` visual theme
 
 The compiler automatically generates solid edges from each connection to the
 anchor. No explicit edge definitions are needed.

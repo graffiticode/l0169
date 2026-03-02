@@ -10,11 +10,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Build lexicon**: `cd packages/api && npm run build-lexicon`
 - **Build spec**: `cd packages/api && npm run build-spec`
 
+### Testing
+- Tests use Jest with `@jest/globals` imports; test files are colocated as `*.spec.js` in `packages/api/src/`
+- **Run all tests**: `npx jest --experimental-vm-modules packages/api/src/`
+- **Run a single test file**: `npx jest --experimental-vm-modules packages/api/src/compile.spec.js`
+- **Coverage**: `cd packages/api && npm run coverage`
+- The root `jest` config (`package.json`) ignores `packages/` — pass the path explicitly when running tests
+
 ### Linting
 - **Root**: `npm run lint` (lints test/ directory)
 - **API**: `cd packages/api && npm run lint` (lints src/ and tools/)
 - **App**: `cd packages/app && npm run lint`
-- Append `:fix` to any lint command for auto-fix
+- Auto-fix variants: `npm run lint:fix`, `cd packages/api && npm run lint:fix`, `cd packages/app && npm run lint:fix`
 
 ### Deployment
 - **Cloud Build**: `npm run gcp:build`
@@ -59,7 +66,11 @@ The `Transformer.PROG` method auto-generates solid edges from each connection to
 
 **Spec files** (`packages/api/spec/`) — `spec.md` is the language specification, `instructions.md` provides LLM authoring guidelines, `template.gc` is an example program. These are built into `dist/` and served by the API.
 
+**Training data** (`packages/api/spec/data/`) — `training_examples.json` contains example programs with description, code, explanation, and expected output. Used for LLM training and validation.
+
 ### Frontend (packages/app/lib/)
+
+Published as `@graffiticode/l0169` on npm. Exports `Form` and `View` components. CSS via `@graffiticode/l0169/style.css`. Styled with Tailwind CSS.
 
 - `view.jsx` — Top-level View component. Manages state via reducer, handles iframe embedding (postMessage), and triggers recompilation via SWR when state changes.
 - `components/form/Form.tsx` — Renders output: dispatches to `ConceptWeb` for concept web data, raw JSON for other data, or error display.

@@ -179,6 +179,9 @@ export class Transformer extends BasisTransformer {
 
   CONNECTION(node, options, resume) {
     this.visit(node.elts[0], options, (e0, v0) => {
+      if (v0.text && !v0.value) {
+        v0.value = v0.text;
+      }
       resume([], v0);
     });
   }
@@ -244,6 +247,9 @@ export class Transformer extends BasisTransformer {
 
   CONCEPT(node, options, resume) {
     this.visit(node.elts[0], options, (e0, v0) => {
+      if (v0.text && !v0.value) {
+        v0.value = v0.text;
+      }
       resume([], v0);
     });
   }

@@ -8,6 +8,7 @@ interface AssessConfig {
 }
 
 interface ConceptConnection {
+  value?: string;
   text: string;
   assess?: AssessConfig;
 }
@@ -350,14 +351,14 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
         .filter(e => e.data.assess?.expected)
         .map(e => e.data.assess!.expected);
 
-      // Collect placed values within this group (use value for scoring, not display text)
+      // Collect placed values within this group
       const placedValues: { key: string; value: string }[] = [];
       for (const entry of groupEntries) {
         if (hasItems && placedItems[entry.key] !== undefined) {
           const item = items[placedItems[entry.key]];
-          placedValues.push({ key: entry.key, value: item?.value || item?.text || "" });
+          placedValues.push({ key: entry.key, value: item?.value || "" });
         } else if (!hasItems) {
-          placedValues.push({ key: entry.key, value: entry.data.text });
+          placedValues.push({ key: entry.key, value: entry.data.value || "" });
         }
       }
 

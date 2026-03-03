@@ -164,6 +164,9 @@ export class Transformer extends BasisTransformer {
   ANCHOR(node, options, resume) {
     this.visit(node.elts[0], options, (e0, v0) => {
       this.visit(node.elts[1], options, (e1, v1) => {
+        if (v0.text && !v0.value) {
+          v0.value = v0.text;
+        }
         resume([], { ...v1, anchor: v0 });
       });
     });

@@ -10,6 +10,7 @@ interface AssessConfig {
 interface ConceptConnection {
   value?: string;
   text: string;
+  image?: string;
   assess?: AssessConfig;
 }
 
@@ -326,12 +327,12 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
     return data.text;
   };
 
-  // Determine the display image for an entry (placed item image)
-  const getDisplayImage = (key: string): string | undefined => {
+  // Determine the display image for an entry (placed item image, or node's own image)
+  const getDisplayImage = (key: string, data: ConceptConnection): string | undefined => {
     if (hasItems && placedItems[key] !== undefined) {
       return items[placedItems[key]]?.image;
     }
-    return undefined;
+    return data.image;
   };
 
   // Assessment scoring — anchor and connections scored independently
@@ -593,7 +594,7 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
 
             const bg = getEntryBackground(key, data);
             const displayText = getDisplayText(key, data);
-            const displayImage = getDisplayImage(key);
+            const displayImage = getDisplayImage(key, data);
             const hasPlacedItem = hasItems && placedItems[key] !== undefined;
             // Only allow repositioning if the node is empty (no placed item)
             const canReposition = !hasItems || !hasPlacedItem;

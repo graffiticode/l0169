@@ -14,7 +14,7 @@ L0169 is a Graffiticode dialect for authoring interactive concept web assessment
 - Use `value` to set the scoring value for a concept: `concept value 'Hub' {}`
 - `value` is the default display text; use `text` or `image` to override the display
 - Use `text` to override display text for a node or concept
-- Use `image` to set an image URL on a concept: `concept value 'Hub' image 'https://...' {}`
+- Use `image` to set an image URL on a concept, connection, or anchor: `concept value 'Hub' image 'https://...' {}`
 - Use `assess` with `method` and `expected` to define assessment criteria
 - Use `theme` to set the visual theme: `theme DARK` or `theme LIGHT`
 - Use `concepts` with a list of `concept` definitions to create a drag-and-drop tray
@@ -79,3 +79,24 @@ concepts [
   concept value 'Spoke' image 'https://example.com/spoke.png' {}
 ] align RIGHT {}
 ```
+
+## Using Uploaded Images
+
+Users can drag and drop images onto the help panel. Uploaded images appear in
+the prompt as markdown image references: `![filename](url)`.
+
+When you see an image reference like `![photo.png](https://firebasestorage.googleapis.com/...)`,
+use the URL with the `image` function. Extract the URL from the markdown
+reference and pass it as the `image` argument. The `image` function works on
+concepts, connections, and anchors:
+
+```
+concept value 'Label' image 'https://firebasestorage.googleapis.com/...' {}
+anchor image 'https://firebasestorage.googleapis.com/...' text 'Hub' {}
+connection image 'https://firebasestorage.googleapis.com/...' text 'Spoke' {}
+```
+
+If multiple images are uploaded, create one concept per image. Use the filename
+(without extension) as a reasonable default `value` unless the user specifies
+different labels. Use context from the user's prompt to decide whether images
+belong on concepts, connections, or the anchor.

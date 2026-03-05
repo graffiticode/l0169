@@ -353,21 +353,14 @@ export class Transformer extends BasisTransformer {
     this.visit(node.elts[0], options, (e0, v0) => {
       const data = options?.data || {};
       const val = v0.pop();
-      const { topic, instructions, connections = [], anchor, concepts = [], align, theme, edges: userEdges } = val;
-
-      // Use user-defined edges if provided, otherwise auto-generate from connections
-      const edges = userEdges
-        ? userEdges
-        : anchor
-          ? connections.map((_, i) => ({ from: "anchor", to: String(i), type: "solid" }))
-          : [];
+      const { topic, instructions, connections = [], anchor, concepts = [], align, theme, edges } = val;
 
       const conceptWeb = {
         topic: topic || "",
         instructions: instructions || "",
         anchor,
         connections,
-        edges,
+        ...(edges !== undefined && { edges }),
         concepts,
         trayAlign: align,
       };

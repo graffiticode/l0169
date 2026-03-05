@@ -401,8 +401,14 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
   const placedItemIndices = new Set(Object.values(placedItems));
   if (draggingItemIndex !== null) placedItemIndices.add(draggingItemIndex);
 
-  // Resolve value-based edges to position-key-based edges
-  const resolvedEdges = resolveEdges(edges || [], anchor, connections);
+  // Resolve value-based edges to position-key-based edges.
+  // If edges is undefined/null, default to solid edges from anchor to all connections.
+  // If edges is an empty array, render no edges.
+  const resolvedEdges = edges
+    ? resolveEdges(edges, anchor, connections)
+    : anchor
+      ? connections.map((_, i) => ({ fromKey: "anchor", toKey: String(i), type: "solid" } as ResolvedEdge))
+      : [];
 
   const borderColor = isDark ? "#71717a" : "#a1a1aa";
   const nodeBackground = isDark ? "#27272a" : "#ffffff";

@@ -10,7 +10,13 @@ L0169 is a Graffiticode dialect for authoring interactive concept web assessment
 - Use `anchor` to define the central concept placed at the diagram center: `anchor text 'Hub' {}`
 - Use `connections` with a list of `connection` definitions to define peripheral concepts
 - Use `connection` (arity 1) to define a single peripheral node: `connection text 'Foo' {}`
-- Every connection automatically has a solid edge to the anchor — no explicit edge definitions needed
+- By default, solid edges are drawn from the anchor to every connection
+- Use `edges` with a list of `edge` definitions for custom edge rendering
+- Use `from` and `to` on edges to specify source and target nodes by their `value` string
+- `from` and `to` accept a string, a list of strings, or `'*'` (all nodes except the other endpoint)
+- Use `type` on edges: `'solid'` (default), `'dashed'`, `'solid-arrow'`, `'dashed-arrow'`
+- Use `text` on edges to display a label at the midpoint of the edge line
+- Use `image` on edges to display an image at the midpoint of the edge line
 - Use `value` to set the scoring value for a concept: `concept value 'Hub' {}`
 - `value` is the default display text; use `text` or `image` to override the display
 - Use `text` to override display text for a node or concept
@@ -45,10 +51,38 @@ Each concept web program defines:
 - **connections**: peripheral concept nodes arranged radially around the anchor
 - **concepts**: (optional) drag-and-drop tray concepts that students place onto nodes
 - **align**: (optional) tray position — `RIGHT` (default), `LEFT`, `TOP`, `BOTTOM`
+- **edges**: (optional) custom edge definitions; when omitted, solid edges connect anchor to all connections
 - **theme**: `LIGHT` or `DARK` visual theme
 
-The compiler automatically generates solid edges from each connection to the
-anchor. No explicit edge definitions are needed.
+When no `edges` keyword is used, the compiler automatically generates solid
+edges from each connection to the anchor. Use `edges` for custom edge rendering.
+
+## Custom Edges
+
+Use `edges` to define custom connections between nodes. The `from` and `to`
+fields reference nodes by their `value` string. Use `'*'` to mean all nodes
+except those on the other side of the edge.
+
+```
+topic 'Custom Edges'
+anchor value 'Hub' text 'Hub' {}
+connections [
+  connection value 'Foo' text 'Foo' {},
+  connection value 'Bar' text 'Bar' {}
+]
+edges [
+  edge from 'Hub' to '*' type 'solid' {},
+  edge from 'Foo' to 'Bar' type 'dashed' text 'related' {}
+] {}..
+```
+
+Edge types: `'solid'`, `'dashed'`, `'solid-arrow'`, `'dashed-arrow'`.
+
+An empty `edges` list renders no edges:
+
+```
+edges [] {}
+```
 
 ## Drag-and-Drop Assessments
 
@@ -83,20 +117,54 @@ concepts [
 ## Using Uploaded Images
 
 Users can drag and drop images onto the help panel. Uploaded images appear in
-the prompt as markdown image references: `![filename](url)`.
+the conversation as markdown image references: `![filename](url)`.
 
-When you see an image reference like `![photo.png](https://firebasestorage.googleapis.com/...)`,
-use the URL with the `image` function. Extract the URL from the markdown
-reference and pass it as the `image` argument. The `image` function works on
-concepts, connections, and anchors:
+### How to use uploaded images
+
+1. **Scan all messages** in the conversation for markdown image references
+   matching the pattern `![name](url)`. These are uploaded images available
+   for use.
+
+2. **Match images to context.** When the user asks to add images:
+   - If the user specifies which image goes where (e.g., "add the photo to
+     the anchor"), use that image for the specified element.
+   - If the user says something general like "add the images to the
+     connections," distribute the available images across the connections
+     in order.
+   - If there are more elements than images, reuse images or leave some
+     elements without images as appropriate.
+   - If there are more images than elements, use the most relevant ones
+     based on filename or context.
+
+3. **Extract the URL** from the markdown reference and pass it as the `image`
+   argument. The `image` function works on concepts, connections, anchors,
+   and edges:
 
 ```
 concept value 'Label' image 'https://firebasestorage.googleapis.com/...' {}
 anchor image 'https://firebasestorage.googleapis.com/...' text 'Hub' {}
 connection image 'https://firebasestorage.googleapis.com/...' text 'Spoke' {}
+edge from 'A' to 'B' image 'https://firebasestorage.googleapis.com/...' {}
 ```
 
-If multiple images are uploaded, create one concept per image. Use the filename
-(without extension) as a reasonable default `value` unless the user specifies
-different labels. Use context from the user's prompt to decide whether images
-belong on concepts, connections, or the anchor.
+4. **Use the filename as a default label.** When creating concepts from
+   uploaded images, use the filename (without extension) as a reasonable
+   default `value` unless the user specifies different labels.
+
+### Example conversation flow
+
+User uploads two images (appearing as `![me](https://...)` and
+`![gc-logo](https://...)`), then says "add the images to the connections":
+
+```
+connections [
+  connection image 'https://firebasestorage.googleapis.com/.../me.jpeg?...' text 'me' {},
+  connection image 'https://firebasestorage.googleapis.com/.../gc-logo.png?...' text 'gc-logo' {}
+]
+```
+
+User uploads one image and says "use this for the anchor":
+
+```
+anchor image 'https://firebasestorage.googleapis.com/.../photo.png?...' text 'Center' {}
+```

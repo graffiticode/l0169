@@ -27,6 +27,11 @@ semantics and base library can be found here:
 | `concept` | `<record: record>` | Defines a single tray concept (arity 1) |
 | `image` | `<string record: record>` | Sets an image URL for a tray item |
 | `align` | `<[RIGHT\|LEFT\|TOP\|BOTTOM] record: record>` | Sets tray position relative to diagram |
+| `edges` | `<list record: record>` | Defines a list of edge definitions |
+| `edge` | `<record: record>` | Defines a single edge (arity 1) |
+| `from` | `<string\|list record: record>` | Sets the source node(s) by value string |
+| `to` | `<string\|list record: record>` | Sets the target node(s) by value string |
+| `type` | `<string record: record>` | Sets the edge type |
 
 ### topic
 
@@ -168,6 +173,62 @@ Sets the tray position relative to the concept web diagram. Accepted tags:
 align RIGHT
 ```
 
+### edges
+
+Defines a list of edge definitions for custom edge rendering. When omitted,
+solid edges are automatically drawn from the anchor to each connection. When
+provided (even as an empty list), only the specified edges are rendered.
+
+```
+edges [
+  edge from 'Hub' to '*' type 'solid' {},
+  edge from 'Foo' to 'Bar' type 'dashed' text 'related' {}
+] {}
+```
+
+### edge
+
+Defines a single edge (arity 1). Properties like `from`, `to`, `type`,
+`text`, and `image` are passed through the pipeline.
+
+```
+edge from 'Hub' to '*' type 'solid' {}
+```
+
+### from
+
+Sets the source node(s) for an edge. The value is matched against node
+`value` strings. Accepts a single string or a list of strings. The special
+value `'*'` means all nodes except those specified in `to`.
+
+```
+from 'Hub'
+from ['Hub', 'Foo']
+from '*'
+```
+
+### to
+
+Sets the target node(s) for an edge. The value is matched against node
+`value` strings. Accepts a single string or a list of strings. The special
+value `'*'` means all nodes except those specified in `from`.
+
+```
+to 'Foo'
+to ['Foo', 'Bar']
+to '*'
+```
+
+### type
+
+Sets the edge type. Accepted values: `'solid'` (default), `'dashed'`,
+`'solid-arrow'`, `'dashed-arrow'`.
+
+```
+type 'solid'
+type 'dashed-arrow'
+```
+
 ### theme
 
 Select a theme and render the theme toggle button to allow users to set the
@@ -188,6 +249,22 @@ connections [
   connection text 'Foo' assess [method 'value' expected 'Foo'] {},
   connection text 'Bar' assess [method 'value' expected 'Bar'] {},
   connection text 'Baz' assess [method 'value' expected 'Baz'] {}
+] {}..
+```
+
+A concept web with custom edges:
+
+```
+topic 'Custom Edges'
+anchor value 'Hub' text 'Hub' {}
+connections [
+  connection value 'Foo' text 'Foo' {},
+  connection value 'Bar' text 'Bar' {},
+  connection value 'Baz' text 'Baz' {}
+]
+edges [
+  edge from 'Hub' to '*' type 'solid' {},
+  edge from 'Foo' to 'Bar' type 'dashed' text 'related' {}
 ] {}..
 ```
 

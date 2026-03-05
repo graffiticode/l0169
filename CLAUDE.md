@@ -59,10 +59,15 @@ Extends `@graffiticode/basis` with L0169-specific `Checker` and `Transformer` cl
 | `theme` | 2 | UI theme (`DARK` or `LIGHT` tag) |
 | `concepts` | 2 | List of drag-and-drop tray concepts |
 | `concept` | 1 | Single tray concept |
-| `image` | 2 | Image URL for a tray concept |
+| `image` | 2 | Image URL for a tray concept or edge label |
 | `align` | 2 | Tray position: `RIGHT`, `LEFT`, `TOP`, `BOTTOM` |
+| `edges` | 2 | List of custom edge definitions |
+| `edge` | 1 | Single edge definition |
+| `from` | 2 | Edge source node(s) by value string, `'*'` for all |
+| `to` | 2 | Edge target node(s) by value string, `'*'` for all |
+| `type` | 2 | Edge type: `solid`, `dashed`, `solid-arrow`, `dashed-arrow` |
 
-The `Transformer.PROG` method auto-generates solid edges from each connection to the anchor and assembles a `conceptWeb` data structure with topic, instructions, anchor, connections, edges, concepts, and trayAlign.
+The `Transformer.PROG` method assembles a `conceptWeb` data structure with topic, instructions, anchor, connections, edges, concepts, and trayAlign. When no `edges` keyword is used, the frontend defaults to solid edges from the anchor to each connection.
 
 **Spec files** (`packages/api/spec/`) — `spec.md` is the language specification, `instructions.md` provides LLM authoring guidelines, `template.gc` is an example program. These are built into `dist/` and served by the API.
 

@@ -103,5 +103,40 @@ export const lexicon = {
     "cls": "function",
     "length": 2,
     "arity": 2
+  },
+  "edges" : {
+    "tk": 1,
+    "name": "EDGES",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
+  "edge" : {
+    "tk": 1,
+    "name": "EDGE",
+    "cls": "function",
+    "length": 1,
+    "arity": 1
+  },
+  "from" : {
+    "tk": 1,
+    "name": "FROM",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
+  "to" : {
+    "tk": 1,
+    "name": "TO",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
+  "type" : {
+    "tk": 1,
+    "name": "TYPE",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
   }
 }

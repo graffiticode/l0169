@@ -136,6 +136,44 @@ export class Checker extends BasisChecker {
       });
     });
   }
+
+  EDGES(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        resume([], node);
+      });
+    });
+  }
+
+  EDGE(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      resume([], node);
+    });
+  }
+
+  FROM(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        resume([], node);
+      });
+    });
+  }
+
+  TO(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        resume([], node);
+      });
+    });
+  }
+
+  TYPE(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        resume([], node);
+      });
+    });
+  }
 }
 
 export class Transformer extends BasisTransformer {
@@ -273,16 +311,56 @@ export class Transformer extends BasisTransformer {
     });
   }
 
+  EDGES(node, options, resume) {
+    this.visit(node.elts[0], options, (e0, v0) => {
+      this.visit(node.elts[1], options, (e1, v1) => {
+        resume([], { ...v1, edges: v0 });
+      });
+    });
+  }
+
+  EDGE(node, options, resume) {
+    this.visit(node.elts[0], options, (e0, v0) => {
+      resume([], v0);
+    });
+  }
+
+  FROM(node, options, resume) {
+    this.visit(node.elts[0], options, (e0, v0) => {
+      this.visit(node.elts[1], options, (e1, v1) => {
+        resume([], { ...v1, from: v0 });
+      });
+    });
+  }
+
+  TO(node, options, resume) {
+    this.visit(node.elts[0], options, (e0, v0) => {
+      this.visit(node.elts[1], options, (e1, v1) => {
+        resume([], { ...v1, to: v0 });
+      });
+    });
+  }
+
+  TYPE(node, options, resume) {
+    this.visit(node.elts[0], options, (e0, v0) => {
+      this.visit(node.elts[1], options, (e1, v1) => {
+        resume([], { ...v1, type: v0?.tag?.toLowerCase() || v0 });
+      });
+    });
+  }
+
   PROG(node, options, resume) {
     this.visit(node.elts[0], options, (e0, v0) => {
       const data = options?.data || {};
       const val = v0.pop();
-      const { topic, instructions, connections = [], anchor, concepts = [], align, theme } = val;
+      const { topic, instructions, connections = [], anchor, concepts = [], align, theme, edges: userEdges } = val;
 
-      // Auto-generate edges: each connection connects to the anchor
-      const edges = anchor
-        ? connections.map((_, i) => ({ from: "anchor", to: String(i), type: "solid" }))
-        : [];
+      // Use user-defined edges if provided, otherwise auto-generate from connections
+      const edges = userEdges
+        ? userEdges
+        : anchor
+          ? connections.map((_, i) => ({ from: "anchor", to: String(i), type: "solid" }))
+          : [];
 
       const conceptWeb = {
         topic: topic || "",

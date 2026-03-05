@@ -15,9 +15,11 @@ interface ConceptConnection {
 }
 
 interface ConceptEdge {
-  from: string;
-  to: string;
-  type: string;
+  from: string | string[];
+  to: string | string[];
+  type?: string;
+  text?: string;
+  image?: string;
 }
 
 interface TrayItem {
@@ -84,6 +86,96 @@ function computePositions(
   }
 
   return positions;
+}
+
+// Resolved edge with position keys and display properties
+interface ResolvedEdge {
+  fromKey: string;
+  toKey: string;
+  type: string;
+  text?: string;
+  image?: string;
+}
+
+// Build a map from node value string to position key(s)
+function buildValueToKeys(
+  anchor: ConceptConnection | undefined,
+  connections: ConceptConnection[],
+): Record<string, string[]> {
+  const map: Record<string, string[]> = {};
+  const add = (value: string | undefined, key: string) => {
+    if (!value) return;
+    if (!map[value]) map[value] = [];
+    map[value].push(key);
+  };
+  if (anchor) {
+    add(anchor.value, "anchor");
+  }
+  connections.forEach((c, i) => {
+    add(c.value, String(i));
+  });
+  return map;
+}
+
+// Resolve edges: expand value-based from/to into position keys, handle "*" wildcard
+function resolveEdges(
+  edges: ConceptEdge[],
+  anchor: ConceptConnection | undefined,
+  connections: ConceptConnection[],
+): ResolvedEdge[] {
+  const valueToKeys = buildValueToKeys(anchor, connections);
+  const allKeys: string[] = [];
+  if (anchor) allKeys.push("anchor");
+  connections.forEach((_, i) => allKeys.push(String(i)));
+
+  const resolved: ResolvedEdge[] = [];
+
+  for (const edge of edges) {
+    const type = edge.type || "solid";
+    const fromValues = Array.isArray(edge.from) ? edge.from : [edge.from];
+    const toValues = Array.isArray(edge.to) ? edge.to : [edge.to];
+
+    // Resolve from values to keys (without wildcard expansion yet)
+    const fromKeys: string[] = [];
+    let fromIsWildcard = false;
+    for (const v of fromValues) {
+      if (v === "*") {
+        fromIsWildcard = true;
+      } else if (valueToKeys[v]) {
+        fromKeys.push(...valueToKeys[v]);
+      }
+    }
+
+    // Resolve to values to keys (without wildcard expansion yet)
+    const toKeys: string[] = [];
+    let toIsWildcard = false;
+    for (const v of toValues) {
+      if (v === "*") {
+        toIsWildcard = true;
+      } else if (valueToKeys[v]) {
+        toKeys.push(...valueToKeys[v]);
+      }
+    }
+
+    // Expand wildcards: "*" means all keys except those on the other side
+    const finalFromKeys = fromIsWildcard
+      ? allKeys.filter(k => !toKeys.includes(k))
+      : fromKeys;
+    const finalToKeys = toIsWildcard
+      ? allKeys.filter(k => !finalFromKeys.includes(k))
+      : toKeys;
+
+    // Generate edges for each from × to combination
+    for (const fk of finalFromKeys) {
+      for (const tk of finalToKeys) {
+        if (fk !== tk) {
+          resolved.push({ fromKey: fk, toKey: tk, type, text: edge.text, image: edge.image });
+        }
+      }
+    }
+  }
+
+  return resolved;
 }
 
 // Insert blank lines when transitioning out of a list so markdown ends the list
@@ -309,10 +401,15 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
   const placedItemIndices = new Set(Object.values(placedItems));
   if (draggingItemIndex !== null) placedItemIndices.add(draggingItemIndex);
 
+  // Resolve value-based edges to position-key-based edges
+  const resolvedEdges = resolveEdges(edges || [], anchor, connections);
+
   const borderColor = isDark ? "#71717a" : "#a1a1aa";
   const nodeBackground = isDark ? "#27272a" : "#ffffff";
   const nodeTextColor = isDark ? "#e4e4e7" : "#18181b";
   const edgeColor = isDark ? "#71717a" : "#a1a1aa";
+  const edgeLabelColor = isDark ? "#a1a1aa" : "#52525b";
+  const edgeLabelBg = isDark ? "#27272a" : "#ffffff";
   const topicColor = isDark ? "#e4e4e7" : "#18181b";
 
   const markerSize = 10 * scale;
@@ -544,9 +641,9 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                   <polygon points={`0 0, ${markerSize} ${markerSize * 0.35}, 0 ${markerSize * 0.7}`} fill={edgeColor} />
                 </marker>
               </defs>
-              {edges.map((edge, i) => {
-                const from = positions[edge.from];
-                const to = positions[edge.to];
+              {resolvedEdges.map((edge, i) => {
+                const from = positions[edge.fromKey];
+                const to = positions[edge.toKey];
                 if (!from || !to) return null;
 
                 const dx = to.x - from.x;
@@ -570,18 +667,47 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                 const dashSize = 6 * scale;
                 const gapSize = 4 * scale;
 
+                const midX = (x1 + x2) / 2;
+                const midY = (y1 + y2) / 2;
+
                 return (
-                  <line
-                    key={i}
-                    x1={x1}
-                    y1={y1}
-                    x2={x2}
-                    y2={y2}
-                    stroke={edgeColor}
-                    strokeWidth={strokeWidth}
-                    strokeDasharray={isDashed ? `${dashSize} ${gapSize}` : undefined}
-                    markerEnd={isArrow ? "url(#arrowhead)" : undefined}
-                  />
+                  <g key={i}>
+                    <line
+                      x1={x1}
+                      y1={y1}
+                      x2={x2}
+                      y2={y2}
+                      stroke={edgeColor}
+                      strokeWidth={strokeWidth}
+                      strokeDasharray={isDashed ? `${dashSize} ${gapSize}` : undefined}
+                      markerEnd={isArrow ? "url(#arrowhead)" : undefined}
+                    />
+                    {edge.image && (
+                      <image
+                        href={edge.image}
+                        x={midX - nodeSize * 0.2}
+                        y={midY - nodeSize * 0.2}
+                        width={nodeSize * 0.4}
+                        height={nodeSize * 0.4}
+                      />
+                    )}
+                    {edge.text && !edge.image && (
+                      <text
+                        x={midX}
+                        y={midY}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fill={edgeLabelColor}
+                        fontSize={`${fontSize * 0.75}rem`}
+                        paintOrder="stroke"
+                        stroke={edgeLabelBg}
+                        strokeWidth={3 * scale}
+                        strokeLinejoin="round"
+                      >
+                        {edge.text}
+                      </text>
+                    )}
+                  </g>
                 );
               })}
             </svg>

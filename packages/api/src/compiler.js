@@ -70,13 +70,13 @@ export class Checker extends BasisChecker {
 
   METHOD(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
-      const val = typeof v0 === "string" ? v0 : v0.tag;
+      const val = typeof v0 === "string" ? v0 : (v0?.tag || v0?.elts?.[0]);
       if (val === "value" || val === "VALUE") {
         resume([], node);
       } else {
         const node0 = this.nodePool[node.elts[0]];
         const err = [{
-          message: `Expecting 'value' or tag VALUE. Got ${v0.tag && "tag " + v0.tag || JSON.stringify(v0)}.`,
+          message: `Expecting 'value' or tag VALUE. Got ${val && "tag " + val || JSON.stringify(v0)}.`,
           ...node0.coord,
         }];
         resume(err, node);
@@ -94,11 +94,12 @@ export class Checker extends BasisChecker {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
         const node0 = this.nodePool[node.elts[0]]
-        if (v0.tag === "DARK" || v0.tag === "LIGHT") {
+        const tag = v0?.tag || v0?.elts?.[0];
+        if (tag === "DARK" || tag === "LIGHT") {
           resume([], node);
         } else {
           const err = [{
-            message: `Expecting a tag DARK or tag LIGHT. Got ${v0.tag && "tag " + v0.tag || v0}.`,
+            message: `Expecting a tag DARK or tag LIGHT. Got ${tag && "tag " + tag || JSON.stringify(v0)}.`,
             ...node0.coord,
           }];
           resume(err, node);
@@ -254,7 +255,8 @@ export class Transformer extends BasisTransformer {
 
   METHOD(node, options, resume) {
     this.visit(node.elts[0], options, (e0, v0) => {
-      const method = v0.tag ? v0.tag.toLowerCase() : v0;
+      const tag = v0?.tag || v0?.elts?.[0];
+      const method = tag ? tag.toLowerCase() : v0;
       resume([], { method });
     });
   }
@@ -269,8 +271,9 @@ export class Transformer extends BasisTransformer {
     this.visit(node.elts[0], options, (e0, v0) => {
       this.visit(node.elts[1], options, (e1, v1) => {
         const data = options?.data || {};
+        const tag = v0?.tag || v0?.elts?.[0];
         resume([], {
-          theme: v0?.tag,
+          theme: tag,
           ...(typeof v1 === "object" && v1 || { _: v1 }),
           ...data,
         });
@@ -306,7 +309,8 @@ export class Transformer extends BasisTransformer {
   ALIGN(node, options, resume) {
     this.visit(node.elts[0], options, (e0, v0) => {
       this.visit(node.elts[1], options, (e1, v1) => {
-        resume([], { ...v1, align: v0?.tag?.toLowerCase() || v0 });
+        const tag = v0?.tag || v0?.elts?.[0];
+        resume([], { ...v1, align: tag?.toLowerCase() || v0 });
       });
     });
   }
@@ -344,7 +348,8 @@ export class Transformer extends BasisTransformer {
   TYPE(node, options, resume) {
     this.visit(node.elts[0], options, (e0, v0) => {
       this.visit(node.elts[1], options, (e1, v1) => {
-        resume([], { ...v1, type: v0?.tag?.toLowerCase() || v0 });
+        const tag = v0?.tag || v0?.elts?.[0];
+        resume([], { ...v1, type: tag?.toLowerCase() || v0 });
       });
     });
   }

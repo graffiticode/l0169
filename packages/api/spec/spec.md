@@ -161,7 +161,7 @@ Sets an image URL for a tray concept. The image is displayed in the badge and
 on the node when the concept is dropped.
 
 ```
-concept image 'https://example.com/img.png' {}
+concept image 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Circle_-_black_simple.svg/120px-Circle_-_black_simple.svg.png' {}
 ```
 
 ### align

@@ -109,23 +109,30 @@ A concept with an image that scores by value:
 
 ```
 concepts [
-  concept value 'Hub' image 'https://example.com/hub.png' {},
-  concept value 'Spoke' image 'https://example.com/spoke.png' {}
+  concept value 'Hub' image 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Circle_-_black_simple.svg/120px-Circle_-_black_simple.svg.png' {},
+  concept value 'Spoke' image 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Solar_system.jpg/120px-Solar_system.jpg' {}
 ] align RIGHT {}
 ```
 
-## Using Uploaded Images
+## Using Images
 
-Users can drag and drop images onto the help panel. Uploaded images appear in
-the conversation as markdown image references: `![filename](url)`.
+**CRITICAL RULE:** Whenever the user mentions "image", "images", "photo",
+"picture", or any visual content, you MUST:
 
-### How to use uploaded images
+1. **Search the ENTIRE conversation** (all messages, including the system
+   prompt, help text, and prior user messages) for every markdown image
+   reference matching `![name](url)`. Collect ALL URLs found.
 
-1. **Scan all messages** in the conversation for markdown image references
-   matching the pattern `![name](url)`. These are uploaded images available
-   for use.
+2. **Use the closest matching URL** for the user's request. Match by filename,
+   label, or context. If the user says "add my photo," find the image whose
+   filename best matches (e.g., `![me](https://...)`).
 
-2. **Match images to context.** When the user asks to add images:
+3. **If no uploaded image is found**, find a real, publicly accessible image
+   URL from a well-known source (e.g., Wikimedia Commons, Unsplash, or a
+   CDN). **NEVER use example.com, placeholder.com, or any fictional URL.**
+   Every `image` URL in generated code MUST point to a real, loadable image.
+
+4. **Match images to context.** When the user asks to add images:
    - If the user specifies which image goes where (e.g., "add the photo to
      the anchor"), use that image for the specified element.
    - If the user says something general like "add the images to the

@@ -415,10 +415,9 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
   const nodeTextColor = isDark ? "#e4e4e7" : "#18181b";
   const edgeColor = isDark ? "#71717a" : "#a1a1aa";
   const edgeLabelColor = isDark ? "#a1a1aa" : "#52525b";
-  const edgeLabelBg = isDark ? "#27272a" : "#ffffff";
   const topicColor = isDark ? "#e4e4e7" : "#18181b";
 
-  const markerSize = 10 * scale;
+  const markerSize = 6 * scale;
 
   // Determine the display text for an entry (placed concept overrides connection text)
   // For concepts: text or image override display, value is the fallback label
@@ -702,22 +701,44 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                       let angle = Math.atan2(dy, dx) * (180 / Math.PI);
                       const flipped = angle > 90 || angle < -90;
                       if (flipped) angle += 180;
+                      // Available edge length between node borders
+                      const edgeLen = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+                      const arrowMargin = isArrow ? markerSize : 0;
+                      const maxWidth = Math.max(0, edgeLen - arrowMargin * 2);
+                      const gap = 6 * scale;
+                      const labelFontSize = fontSize * 0.85;
+                      const charWidth = labelFontSize * 16 * 0.55;
+                      const charsPerLine = Math.max(1, Math.floor(maxWidth / charWidth));
+                      const words = edge.text.split(' ');
+                      const lines: string[] = [];
+                      let current = '';
+                      for (const word of words) {
+                        const test = current ? current + ' ' + word : word;
+                        if (test.length <= charsPerLine) {
+                          current = test;
+                        } else {
+                          if (current) lines.push(current);
+                          current = word;
+                        }
+                      }
+                      if (current) lines.push(current);
+                      const lineHeight = labelFontSize * 16 * 1.2;
+                      const totalHeight = lines.length * lineHeight;
                       return (
                         <text
                           x={midX}
-                          y={midY}
-                          dy={`-${4 * scale}px`}
+                          y={midY - gap - totalHeight + lineHeight}
                           textAnchor="middle"
                           dominantBaseline="alphabetic"
                           fill={edgeLabelColor}
-                          fontSize={`${fontSize * 0.85}rem`}
-                          paintOrder="stroke"
-                          stroke={edgeLabelBg}
-                          strokeWidth={3 * scale}
-                          strokeLinejoin="round"
+                          fontSize={`${labelFontSize}rem`}
                           transform={`rotate(${angle}, ${midX}, ${midY})`}
                         >
-                          {edge.text}
+                          {lines.map((line, li) => (
+                            <tspan key={li} x={midX} dy={li === 0 ? 0 : `${lineHeight}px`}>
+                              {line}
+                            </tspan>
+                          ))}
                         </text>
                       );
                     })()}

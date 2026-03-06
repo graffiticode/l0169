@@ -1,133 +1,151 @@
 # L0169 RAG Training Examples
 
-100 example prompts for training a RAG model on the L0169 concept web assessment language.
+112 example prompts for training a RAG model on the L0169 concept web assessment language.
 
-## Category 1: Minimal / Structural Basics (1–10)
+## Category 1: Minimal / Structural Basics (1–8)
 
 1. Create a concept web with just an anchor node labeled "Center".
-2. Create a concept web with an anchor and one connection.
-3. Create a concept web with an anchor and two connections.
-4. Create a concept web with an anchor and three connections.
-5. Create a concept web with an anchor and five connections.
-6. Create a concept web with a topic and an anchor.
-7. Create a concept web with a topic, an anchor, and two connections.
-8. Create a concept web with a topic and instructions, but no nodes.
-9. Create a concept web with a topic, instructions, an anchor, and one connection.
-10. Create an empty concept web with only a topic label.
+2. Create a concept web with an anchor and two connections.
+3. Create a concept web with an anchor and three connections.
+4. Create a concept web with a topic and an anchor.
+5. Create a concept web with a topic, an anchor, and two connections.
+6. Create a concept web with a topic and instructions, but no nodes.
+7. Create a concept web with a topic, instructions, an anchor, and one connection.
+8. Create an empty concept web with only a topic label.
 
-## Category 2: Topic and Instructions (11–20)
+## Category 2: Topic and Instructions (9–17)
 
-11. Create a concept web with the topic "Solar System".
-12. Create a concept web with a short one-line instruction.
-13. Create a concept web with multiline markdown instructions using a bulleted list.
-14. Create a concept web with markdown instructions that include bold and italic text.
-15. Create a concept web with a topic and instructions that explain how to complete the assessment.
-16. Create a concept web with a long descriptive instruction paragraph.
-17. Create a concept web with numbered step-by-step instructions in markdown.
-18. Create a concept web where the instructions tell students to drag concepts onto the correct nodes.
-19. Create a concept web with a topic and empty instructions.
-20. Create a concept web with instructions that include both a description and a bulleted list.
+9. Create a concept web with the topic "Solar System".
+10. Create a concept web with a short one-line instruction.
+11. Create a concept web with multiline markdown instructions using a bulleted list.
+12. Create a concept web with markdown instructions that include bold and italic text.
+13. Create a concept web with a topic and instructions that explain how to complete the assessment.
+14. Create a concept web with a long descriptive instruction paragraph.
+15. Create a concept web with numbered step-by-step instructions in markdown.
+16. Create a concept web where the instructions tell students to drag concepts onto the correct nodes.
+17. Create a concept web with instructions that include both a description and a bulleted list.
 
-## Category 3: Anchor Node (21–28)
+## Category 3: Anchor Node (18–25)
 
-21. Create a concept web with an anchor that has display text.
-22. Create a concept web with an anchor that has a value but no display text override.
-23. Create a concept web with an anchor that uses both value and text where text differs from value.
-24. Create a concept web with an anchor that has assessment expecting a specific value.
-25. Create a concept web with an anchor with text set to empty string for drag-and-drop.
-26. Create a concept web with an anchor using method VALUE tag instead of string 'value'.
-27. Create a concept web with an anchor assessed with method 'value' and an expected value.
-28. Create a concept web where the anchor has a value, display text override, and assessment.
+18. Create a concept web with an anchor that has display text.
+19. Create a concept web with an anchor that has a value but no display text override.
+20. Create a concept web with an anchor that uses both value and text where text differs from value.
+21. Create a concept web with an anchor that has assessment expecting a specific value.
+22. Create a concept web with an anchor with text set to empty string for drag-and-drop.
+23. Create a concept web with an anchor using method VALUE tag instead of string 'value'.
+24. Create a concept web with an anchor assessed with method 'value' and an expected value.
+25. Create a concept web where the anchor has a value, display text override, and assessment.
 
-## Category 4: Connections (29–40)
+## Category 4: Connections (26–35)
 
-29. Create a concept web with one connection that has display text.
-30. Create a concept web with two connections, each with different text labels.
-31. Create a concept web with three connections arranged around the anchor.
-32. Create a concept web with four connections.
-33. Create a concept web with six connections around a central anchor.
-34. Create a concept web where each connection has a value set.
-35. Create a concept web where connections use both value and text with different strings.
-36. Create a concept web with connections that have assessment on each node.
-37. Create a concept web with three connections, only two of which are assessed.
-38. Create a concept web with connections where text is set to empty strings for drag-and-drop.
-39. Create a concept web with five connections, each assessed with different expected values.
-40. Create a concept web where one connection has no assessment and the others do.
+26. Create a concept web with one connection that has display text.
+27. Create a concept web with two connections, each with different text labels.
+28. Create a concept web with three connections arranged around the anchor.
+29. Create a concept web with six connections around a central anchor.
+30. Create a concept web where each connection has a value set.
+31. Create a concept web where connections use both value and text with different strings.
+32. Create a concept web with connections that have assessment on each node.
+33. Create a concept web with three connections, only two of which are assessed.
+34. Create a concept web with connections where text is set to empty strings for drag-and-drop.
+35. Create a concept web where one connection has no assessment and the others do.
 
-## Category 5: Assessment Basics (41–52)
+## Category 5: Assessment (36–43)
 
-41. Create an assessed concept web where the anchor expects the value "Main".
-42. Create a concept web where one connection is assessed with expected value "A".
-43. Create a concept web where the anchor and all connections are assessed.
-44. Create a concept web with three connections, each assessed with method 'value' and different expected values.
-45. Create a concept web where assessment uses the VALUE tag instead of the string 'value'.
-46. Create a concept web with two assessed connections using method VALUE tag.
-47. Create a concept web with an assessed anchor and four assessed connections.
-48. Create a concept web where only the anchor is assessed and connections are display-only.
-49. Create a concept web where only the connections are assessed and the anchor is display-only.
-50. Create a concept web with five assessed connections and an assessed anchor, all using method 'value'.
-51. Create a concept web with three connections where expected values are single-word strings.
-52. Create a concept web with three connections where expected values are multi-word strings.
+36. Create a concept web where one connection is assessed with expected value "A".
+37. Create a concept web where the anchor and all connections are assessed.
+38. Create a concept web with three connections, each assessed with method 'value' and different expected values.
+39. Create a concept web with an assessed anchor and four assessed connections.
+40. Create a concept web where only the anchor is assessed and connections are display-only.
+41. Create a concept web where only the connections are assessed and the anchor is display-only.
+42. Create a concept web with five assessed connections and an assessed anchor, all using method 'value'. *
+43. Create a concept web with three connections where expected values are multi-word strings.
 
-## Category 6: Concepts Tray / Drag-and-Drop (53–68)
+## Category 6: Concepts Tray / Drag-and-Drop (44–57)
 
-53. Create a concept web with a concepts tray containing two items.
-54. Create a concept web with a concepts tray containing three text concepts.
-55. Create a concept web with a concepts tray containing five items.
-56. Create a concept web with a concepts tray aligned to the right.
-57. Create a concept web with a concepts tray aligned to the left.
-58. Create a concept web with a concepts tray aligned to the top.
-59. Create a concept web with a concepts tray aligned to the bottom.
-60. Create a drag-and-drop concept web where the anchor text is blank and the concepts tray has the answer.
-61. Create a drag-and-drop concept web where all connection texts are blank and concepts provide the answers.
-62. Create a drag-and-drop concept web where both anchor and connections are blank with a concepts tray.
-63. Create a drag-and-drop concept web with three blank nodes and three matching concepts in the tray.
-64. Create a drag-and-drop concept web with concepts that have values different from their display text.
-65. Create a drag-and-drop concept web with four blank connections, four concepts, and assessment on every node.
-66. Create a drag-and-drop concept web with the tray on the left side and three concepts.
-67. Create a drag-and-drop concept web where the tray has more concepts than there are nodes (distractors).
-68. Create a drag-and-drop concept web with exactly one distractor concept in the tray.
+44. Create a concept web with a concepts tray containing two items.
+45. Create a concept web with a concepts tray containing three text concepts.
+46. Create a concept web with a concepts tray aligned to the right.
+47. Create a concept web with a concepts tray aligned to the left.
+48. Create a concept web with a concepts tray aligned to the top.
+49. Create a concept web with a concepts tray aligned to the bottom.
+50. Create a drag-and-drop concept web where the anchor text is blank and the concepts tray has the answer.
+51. Create a drag-and-drop concept web where all connection texts are blank and concepts provide the answers.
+52. Create a drag-and-drop concept web where both anchor and connections are blank with a concepts tray.
+53. Create a drag-and-drop concept web with three blank nodes and three matching concepts in the tray.
+54. Create a drag-and-drop concept web with concepts that have values different from their display text.
+55. Create a drag-and-drop concept web with four blank connections, four concepts, and assessment on every node.
+56. Create a drag-and-drop concept web where the tray has more concepts than there are nodes (distractors).
+57. Create a drag-and-drop concept web with exactly one distractor concept in the tray.
 
-## Category 7: Images on Concepts (69–76)
+## Category 7: Images (58–67)
 
-69. Create a concept with a value and an image URL.
-70. Create a concepts tray where each concept has an image.
-71. Create a concepts tray with two image concepts and one text-only concept.
-72. Create a drag-and-drop concept web where concepts use images instead of text.
-73. Create a drag-and-drop concept web with three image concepts and assessment on the nodes.
-74. Create a concepts tray with images aligned to the top of the diagram.
-75. Create a concept web with a mix of image concepts and text concepts in the tray.
-76. Create a drag-and-drop concept web where image concepts have values that differ from the image URL.
+58. Create a concept with a value and an image URL.
+59. Create a concepts tray where each concept has an image.
+60. Create a concepts tray with two image concepts and one text-only concept.
+61. Create a drag-and-drop concept web where concepts use images instead of text.
+62. Create a drag-and-drop concept web with three image concepts and assessment on the nodes.
+63. Create a concepts tray with images aligned to the top of the diagram.
+64. Create a concept web with a mix of image concepts and text concepts in the tray.
+65. Create a drag-and-drop concept web where image concepts have values that differ from the image URL.
+66. Create a concept web with an image on the anchor node. *
+67. Create a concept web with images on connections. *
 
-## Category 8: Theme (77–82)
+## Category 8: Theme (68–73)
 
-77. Create a concept web with the dark theme.
-78. Create a concept web with the light theme.
-79. Create a concept web with the dark theme, a topic, and an anchor with two connections.
-80. Create a concept web with the light theme and a concepts tray.
-81. Create a dark-themed drag-and-drop concept web with assessment.
-82. Create a light-themed concept web with a topic, instructions, and three connections.
+68. Create a concept web with the dark theme.
+69. Create a concept web with the light theme.
+70. Create a concept web with the dark theme, a topic, and an anchor with two connections.
+71. Create a concept web with the light theme and a concepts tray.
+72. Create a dark-themed drag-and-drop concept web with assessment.
+73. Create a light-themed concept web with a topic, instructions, and three connections.
 
-## Category 9: Structural Compositions (83–92)
+## Category 9: Edges — Basics (74–85) *
 
-83. Create an assessed concept web with a topic, anchor, and three assessed connections. No concepts tray.
-84. Create a concept web with a topic, instructions, an anchor, two connections, and no assessment.
-85. Create a concept web with a topic, instructions, assessed anchor, three assessed connections, and a right-aligned concepts tray with matching items.
-86. Create a drag-and-drop concept web with a topic, instructions, blank anchor, blank connections, concepts tray, and assessment on all nodes.
-87. Create a concept web with a topic, five connections with assessment, and a concepts tray with five items plus two distractors aligned to the left.
-88. Create a concept web with a topic, instructions, dark theme, anchor, and four connections. No assessment.
-89. Create an assessed drag-and-drop concept web with a topic, instructions, light theme, blank anchor, three blank connections, and a bottom-aligned concepts tray.
-90. Create a concept web with a topic, anchor with text override, three connections with text overrides, and assessment on all nodes using different expected values.
-91. Create a concept web that uses value on all concepts for scoring but overrides display text on every node.
-92. Create a drag-and-drop concept web where the concepts tray uses images, the tray is top-aligned, all nodes are blank and assessed, and a topic and instructions are provided.
+74. Create a concept web with a single solid edge from the anchor to one connection. *
+75. Create a concept web with solid edges from the anchor to all connections using the edges keyword. *
+76. Create a concept web with dashed edges from the anchor to all connections. *
+77. Create a concept web with solid-arrow edges from the anchor to all connections. *
+78. Create a concept web with dashed-arrow edges from the anchor to all connections. *
+79. Create a concept web with an empty edges list so no edges are rendered. *
+80. Create a concept web with edges using the '*' wildcard on the to field to connect the anchor to all connections. *
+81. Create a concept web with edges using the '*' wildcard on the from field. *
+82. Create a concept web with an edge where from is a list of two node values. *
+83. Create a concept web with an edge where to is a list of two node values. *
+84. Create a concept web with an edge that has a text label at the midpoint. *
+85. Create a concept web with an edge that has an image at the midpoint. *
 
-## Category 10: Full Feature Combinations (93–100)
+## Category 10: Edges — Combinations (86–95) *
 
-93. Create a fully assessed concept web with a topic, instructions, dark theme, anchor, four connections, and assessment using method 'value' on every node.
-94. Create a drag-and-drop concept web with a topic, markdown instructions with a bulleted list, blank anchor, five blank connections, a right-aligned concepts tray with five text items, and value-based assessment on all six nodes.
-95. Create a concept web with a topic, multiline instructions, light theme, an anchor with value and display text, three connections each with value, text override, and assessment, and a left-aligned concepts tray with three image concepts plus one distractor.
-96. Create a drag-and-drop concept web with a topic, step-by-step markdown instructions, dark theme, blank anchor, six blank connections, a bottom-aligned concepts tray with six text concepts and two distractors, and assessment on all nodes.
-97. Create a concept web with a topic, instructions, anchor with both value and text, five connections each assessed with different expected values, and a top-aligned concepts tray mixing text and image concepts.
-98. Create a fully featured concept web: topic, multiline markdown instructions, light theme, assessed anchor with value and text override, four assessed connections with value and text overrides, and a right-aligned concepts tray with four image concepts plus two text distractors.
-99. Create a drag-and-drop concept web with a topic, instructions, dark theme, blank anchor assessed for a specific value, three blank connections each assessed for different values, and a left-aligned concepts tray with exactly three matching concepts and no distractors.
-100. Create a complete concept web assessment with a topic, bulleted markdown instructions, light theme, an anchor with value, text, and assessment, five connections each with value, text override, and assessment, and a bottom-aligned concepts tray with five image concepts and three text distractor concepts.
+86. Create a concept web with mixed edge types — some solid and some dashed. *
+87. Create a concept web with a peer-to-peer edge between two connections, not through the anchor. *
+88. Create a concept web with solid edges from anchor to all connections plus a dashed peer-to-peer edge between two connections. *
+89. Create a concept web with edges where each edge has a different text label. *
+90. Create a concept web with edges using '*' wildcard from the anchor and one specific peer edge with a text label. *
+91. Create a concept web with solid-arrow edges from anchor to connections and a dashed-arrow edge between two connections. *
+92. Create a concept web with edges where from and to both use lists of multiple node values. *
+93. Create a concept web with edges that mix solid, dashed, solid-arrow, and dashed-arrow types. *
+94. Create a concept web with a peer-to-peer edge that has both a text label and a specific type. *
+95. Create a concept web with edges where one edge uses '*' wildcard and another uses a specific list for from. *
+
+## Category 11: Edges + Other Features (96–103) *
+
+96. Create a concept web with custom edges and assessment on all nodes. *
+97. Create a drag-and-drop concept web with custom edges and a concepts tray. *
+98. Create a concept web with custom edges, dark theme, topic, and instructions. *
+99. Create a concept web with dashed edges, assessment, and a left-aligned concepts tray. *
+100. Create a drag-and-drop concept web with custom edges, blank nodes, assessment, and a right-aligned concepts tray with distractors. *
+101. Create a concept web with mixed edge types, text labels on edges, and assessment on all nodes. *
+102. Create a concept web with solid-arrow edges, an image on one edge, and a concepts tray with images. *
+103. Create a concept web with custom edges, light theme, topic, instructions, and images on connections. *
+
+## Category 12: Full Feature Compositions (104–112)
+
+104. Create an assessed concept web with a topic, anchor, and three assessed connections. No concepts tray.
+105. Create a concept web with a topic, instructions, an anchor, two connections, and no assessment.
+106. Create a concept web with a topic, instructions, assessed anchor, three assessed connections, and a right-aligned concepts tray with matching items.
+107. Create a drag-and-drop concept web with a topic, instructions, blank anchor, blank connections, concepts tray, and assessment on all nodes.
+108. Create a concept web with a topic, five connections with assessment, and a concepts tray with five items plus two distractors aligned to the left.
+109. Create a concept web with a topic, instructions, dark theme, anchor, and four connections. No assessment.
+110. Create a concept web with a topic, anchor with text override, three connections with text overrides, and assessment on all nodes using different expected values.
+111. Create a fully featured concept web with topic, markdown instructions, dark theme, custom edges with mixed types and text labels, assessed anchor and connections, and a bottom-aligned concepts tray with image concepts and text distractors. *
+112. Create a drag-and-drop concept web with topic, instructions, light theme, solid-arrow edges from anchor to all connections, dashed peer-to-peer edges with labels, blank assessed nodes, and a right-aligned concepts tray with matching concepts. *

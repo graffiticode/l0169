@@ -697,22 +697,30 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                         height={nodeSize * 0.4}
                       />
                     )}
-                    {edge.text && !edge.image && (
-                      <text
-                        x={midX}
-                        y={midY}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        fill={edgeLabelColor}
-                        fontSize={`${fontSize * 0.75}rem`}
-                        paintOrder="stroke"
-                        stroke={edgeLabelBg}
-                        strokeWidth={3 * scale}
-                        strokeLinejoin="round"
-                      >
-                        {edge.text}
-                      </text>
-                    )}
+                    {edge.text && !edge.image && (() => {
+                      // Compute angle in degrees, keep text readable (not upside down)
+                      let angle = Math.atan2(dy, dx) * (180 / Math.PI);
+                      const flipped = angle > 90 || angle < -90;
+                      if (flipped) angle += 180;
+                      return (
+                        <text
+                          x={midX}
+                          y={midY}
+                          dy={`-${4 * scale}px`}
+                          textAnchor="middle"
+                          dominantBaseline="alphabetic"
+                          fill={edgeLabelColor}
+                          fontSize={`${fontSize * 0.85}rem`}
+                          paintOrder="stroke"
+                          stroke={edgeLabelBg}
+                          strokeWidth={3 * scale}
+                          strokeLinejoin="round"
+                          transform={`rotate(${angle}, ${midX}, ${midY})`}
+                        >
+                          {edge.text}
+                        </text>
+                      );
+                    })()}
                   </g>
                 );
               })}

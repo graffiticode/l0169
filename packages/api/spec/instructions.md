@@ -13,6 +13,7 @@ L0169 is a Graffiticode dialect for authoring interactive concept web assessment
 - By default, solid edges are drawn from the anchor to every connection
 - Use `edges` with a list of `edge` definitions for custom edge rendering
 - Use `from` and `to` on edges to specify source and target nodes by their `value` string
+- **IMPORTANT:** The `from` and `to` strings must match the `value` of the anchor or connection nodes. When using custom edges, always set an explicit `value` on the anchor and each connection so edges can reference them
 - `from` and `to` accept a string, a list of strings, or `'*'` (all nodes except the other endpoint)
 - Use `type` on edges: `'solid'` (default), `'dashed'`, `'solid-arrow'`, `'dashed-arrow'`
 - Use `text` on edges to display a label at the midpoint of the edge line

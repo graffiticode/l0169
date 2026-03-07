@@ -90,9 +90,11 @@ edges [] {}
 To create a drag-and-drop assessment, define `concepts` alongside `anchor` and
 `connections`. Set node text to empty strings and use `assess` with `expected`
 values. Students drag concepts from the tray onto nodes, and assessment validates
-the placed concept's `value` against the expected value using position-independent
-matching. Use `text` or `image` to customize the display independently of the
-scoring value.
+the placed concept's `value` against the node's `expected` value. Assessment validation considers edge properties — positions with identical
+edge configurations (same type, text, image, and connected nodes) are
+interchangeable, so swapping values between them is valid. Positions with
+different edge configurations require exact matching. Use `text` or `image`
+to customize the display independently of the scoring value.
 
 ```
 topic 'Fill in the blanks'

@@ -437,60 +437,100 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
     return data.image;
   };
 
-  // Assessment scoring — anchor and connections scored independently
-  const getEntryBackground = (key: string, data: ConceptConnection): string => {
-    if (!data.assess) return nodeBackground;
-
-    if (data.assess.method === "value") {
-      const isAnchor = key === "anchor";
-
-      // Partition entries into anchor vs connection groups
-      const groupEntries = allEntries.filter(e =>
-        isAnchor ? e.key === "anchor" : e.key !== "anchor"
-      );
-
-      // Collect expected values within this group
-      const expectedValues = groupEntries
-        .filter(e => e.data.assess?.expected)
-        .map(e => e.data.assess!.expected);
-
-      // Collect placed values within this group
-      const placedValues: { key: string; value: string }[] = [];
-      for (const entry of groupEntries) {
-        if (hasItems && placedItems[entry.key] !== undefined) {
-          const item = items[placedItems[entry.key]];
-          placedValues.push({ key: entry.key, value: item?.value || "" });
-        } else if (!hasItems) {
-          placedValues.push({ key: entry.key, value: entry.data.value || "" });
-        }
+  // Compute edge signature for a position key based on resolved edges touching it.
+  // Two positions with the same signature are interchangeable for assessment.
+  const edgeSignature = (key: string): string => {
+    const nodeType = key === "anchor" ? "anchor" : "connection";
+    if (resolvedEdges.length === 0) {
+      // No edges at all — group by node type only
+      return nodeType;
+    }
+    const parts: string[] = [nodeType];
+    for (const re of resolvedEdges) {
+      if (re.fromKey === key) {
+        parts.push(`f|${re.type || ""}|${re.text || ""}|${re.image || ""}|${re.toKey}`);
+      } else if (re.toKey === key) {
+        parts.push(`t|${re.type || ""}|${re.text || ""}|${re.image || ""}|${re.fromKey}`);
       }
+    }
+    parts.sort();
+    return parts.join(";;");
+  };
 
-      // Greedy bipartite matching within the group (track by index so
-      // duplicate expected values each match independently)
-      const claimed = new Set<number>();
-      const correctKeys = new Set<string>();
-
-      for (const pv of placedValues) {
-        for (let i = 0; i < expectedValues.length; i++) {
-          if (!claimed.has(i) && pv.value === expectedValues[i]) {
-            claimed.add(i);
-            correctKeys.add(pv.key);
-            break;
-          }
-        }
+  // Group assessed entries by edge signature for bipartite matching.
+  // Returns a map: signature → { keys, expectedValues[] }
+  const buildAssessGroups = (): Map<string, { keys: string[]; expected: string[] }> => {
+    const groups = new Map<string, { keys: string[]; expected: string[] }>();
+    const allEntries: Array<{ key: string; data: ConceptConnection }> = [];
+    if (anchor?.assess) allEntries.push({ key: "anchor", data: anchor });
+    connections.forEach((c, i) => {
+      if (c.assess) allEntries.push({ key: String(i), data: c });
+    });
+    for (const { key, data } of allEntries) {
+      if (data.assess?.method !== "value") continue;
+      const sig = edgeSignature(key);
+      let group = groups.get(sig);
+      if (!group) {
+        group = { keys: [], expected: [] };
+        groups.set(sig, group);
       }
+      group.keys.push(key);
+      group.expected.push(data.assess.expected);
+    }
+    return groups;
+  };
 
-      if (correctKeys.has(key)) {
-        return isDark ? "#14532d" : "#dcfce7";
-      }
-
-      // Only show error color if an item has been placed (or if not using items tray)
-      if (!hasItems || placedItems[key] !== undefined) {
-        return isDark ? "#7f1d1d" : "#fee2e2";
+  // Precompute which keys are "matched" (green) via bipartite matching within edge-signature groups
+  const matchedKeys = new Set<string>();
+  const unmatchedKeys = new Set<string>();
+  const assessGroups = buildAssessGroups();
+  for (const [, group] of assessGroups) {
+    // Collect placed values for each key in the group
+    const placedByKey: Record<string, string | undefined> = {};
+    for (const key of group.keys) {
+      if (hasItems && placedItems[key] !== undefined) {
+        placedByKey[key] = items[placedItems[key]]?.value || "";
+      } else if (!hasItems) {
+        const data = key === "anchor" ? anchor : connections[parseInt(key)];
+        placedByKey[key] = data?.value || "";
       }
     }
 
-    return nodeBackground;
+    // Build pool of remaining expected values for bipartite matching
+    const remainingExpected = [...group.expected];
+    // First pass: match placed values against expected pool
+    for (const key of group.keys) {
+      const placed = placedByKey[key];
+      if (placed === undefined) continue; // nothing placed
+      const idx = remainingExpected.indexOf(placed);
+      if (idx !== -1) {
+        matchedKeys.add(key);
+        remainingExpected.splice(idx, 1);
+      } else {
+        unmatchedKeys.add(key);
+      }
+    }
+  }
+
+  // Assessment scoring — edge-signature-aware bipartite matching
+  const getEntryBackground = (key: string, data: ConceptConnection): string => {
+    if (!data.assess) return nodeBackground;
+    if (data.assess.method !== "value") return nodeBackground;
+
+    // Check if something is placed
+    let hasPlaced = false;
+    if (hasItems && placedItems[key] !== undefined) {
+      hasPlaced = true;
+    } else if (!hasItems) {
+      hasPlaced = true;
+    }
+
+    if (!hasPlaced) return nodeBackground;
+
+    if (matchedKeys.has(key)) {
+      return isDark ? "#14532d" : "#dcfce7"; // green
+    }
+    return isDark ? "#7f1d1d" : "#fee2e2"; // red
   };
 
   // Layout direction based on trayAlign

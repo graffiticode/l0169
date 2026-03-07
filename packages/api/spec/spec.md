@@ -179,6 +179,11 @@ Defines a list of edge definitions for custom edge rendering. When omitted,
 solid edges are automatically drawn from the anchor to each connection. When
 provided (even as an empty list), only the specified edges are rendered.
 
+Assessment validation considers edge properties: positions with identical
+edge configurations (same type, text, image, and connected nodes) are
+interchangeable — swapping values between them is valid. Positions with
+different edge configurations require exact matching.
+
 ```
 edges [
   edge from 'Hub' to '*' type 'solid' {},

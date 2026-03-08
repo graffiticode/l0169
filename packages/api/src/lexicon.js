@@ -138,5 +138,19 @@ export const lexicon = {
     "cls": "function",
     "length": 2,
     "arity": 2
+  },
+  "relations" : {
+    "tk": 1,
+    "name": "RELATIONS",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
+  "relation" : {
+    "tk": 1,
+    "name": "RELATION",
+    "cls": "function",
+    "length": 1,
+    "arity": 1
   }
 }

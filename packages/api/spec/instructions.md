@@ -27,6 +27,10 @@ L0169 is a Graffiticode dialect for authoring interactive concept web assessment
 - Use `concepts` with a list of `concept` definitions to create a drag-and-drop tray
 - Use `align` to position the tray: `align RIGHT`, `align LEFT`, `align TOP`, or `align BOTTOM`
 - When using concepts, set node `text` to empty string `''` so students drag concepts to fill them in
+- Use `relations` with a list of `relation` definitions to create a drag-and-drop tray for edge labels
+- Use `align` after `relations` to position the relations tray independently from the concepts tray
+- When using relations, add `assess` to edges with `method 'value'` and `expected` set to the correct relation value
+- Relations use `value` for scoring; `text` or `image` override the display, same pattern as `concept`
 - Add descriptive comments using the pipe symbol `|`
 
 ## Example Patterns
@@ -43,6 +47,39 @@ connections [
 ] {}..
 ```
 
+## Draggable Relation Labels
+
+Use `relations` to create a tray of edge labels that students drag onto edges,
+similar to how `concepts` works for nodes. Each `relation` has a `value` used
+for scoring. Use `text` or `image` to override the display.
+
+```
+topic 'Cell Signaling'
+instructions 'Drag the correct relationship labels onto the edges.'
+anchor value 'Cell' text 'Cell' {}
+connections [
+  connection value 'Receptor' text 'Receptor' {},
+  connection value 'Nucleus' text 'Nucleus' {}
+]
+edges [
+  edge from 'Cell' to 'Receptor' type 'solid-arrow' assess [method 'value' expected 'activates'] {},
+  edge from 'Receptor' to 'Nucleus' type 'dashed-arrow' assess [method 'value' expected 'signals'] {}
+]
+relations [
+  relation value 'activates' {},
+  relation value 'signals' {}
+] align BOTTOM {}..
+```
+
+Relations with display overrides:
+
+```
+relations [
+  relation value 'causes' text 'Causes →' {},
+  relation value 'inhibits' image 'https://...' {}
+] align BOTTOM {}
+```
+
 ## Concept Web Assessments
 
 Each concept web program defines:
@@ -51,6 +88,7 @@ Each concept web program defines:
 - **anchor**: the central concept node placed at the diagram center
 - **connections**: peripheral concept nodes arranged radially around the anchor
 - **concepts**: (optional) drag-and-drop tray concepts that students place onto nodes
+- **relations**: (optional) drag-and-drop tray labels that students place onto edges
 - **align**: (optional) tray position — `RIGHT` (default), `LEFT`, `TOP`, `BOTTOM`
 - **edges**: (optional) custom edge definitions; when omitted, solid edges connect anchor to all connections
 - **theme**: `LIGHT` or `DARK` visual theme

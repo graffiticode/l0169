@@ -32,6 +32,8 @@ semantics and base library can be found here:
 | `from` | `<string\|list record: record>` | Sets the source node(s) by value string |
 | `to` | `<string\|list record: record>` | Sets the target node(s) by value string |
 | `type` | `<string record: record>` | Sets the edge type |
+| `relations` | `<list record: record>` | Defines a list of relation labels for drag-and-drop onto edges |
+| `relation` | `<record: record>` | Defines a single relation label (arity 1) |
 
 ### topic
 
@@ -234,6 +236,31 @@ type 'solid'
 type 'dashed-arrow'
 ```
 
+### relations
+
+Defines a list of relation labels that students can drag onto edges. Relations
+render as badges in a tray alongside the diagram, similar to `concepts` but for
+edges. Use `align` to position the relations tray.
+
+```
+relations [
+  relation value 'causes' {},
+  relation value 'inhibits' {}
+] align BOTTOM {}
+```
+
+### relation
+
+Defines a single relation label (arity 1). Properties like `value`, `text`,
+and `image` are passed through the pipeline. The `value` is used for scoring;
+`text` or `image` override the display.
+
+```
+relation value 'causes' {}
+relation value 'inhibits' text 'Inhibits →' {}
+relation value 'enables' image 'https://...' {}
+```
+
 ### theme
 
 Select a theme and render the theme toggle button to allow users to set the
@@ -288,4 +315,24 @@ concepts [
   concept text 'Foo' {},
   concept text 'Bar' {}
 ] align RIGHT {}..
+```
+
+A concept web with draggable relation labels on edges:
+
+```
+topic 'Cell Signaling'
+instructions 'Drag the correct relationship labels onto the edges.'
+anchor value 'Cell' text 'Cell' {}
+connections [
+  connection value 'Receptor' text 'Receptor' {},
+  connection value 'Nucleus' text 'Nucleus' {}
+]
+edges [
+  edge from 'Cell' to 'Receptor' type 'solid-arrow' assess [method 'value' expected 'activates'] {},
+  edge from 'Receptor' to 'Nucleus' type 'dashed-arrow' assess [method 'value' expected 'signals'] {}
+]
+relations [
+  relation value 'activates' {},
+  relation value 'signals' {}
+] align BOTTOM {}..
 ```

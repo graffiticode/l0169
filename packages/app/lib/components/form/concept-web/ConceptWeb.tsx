@@ -20,6 +20,7 @@ interface ConceptEdge {
   type?: string;
   text?: string;
   image?: string;
+  assess?: AssessConfig;
 }
 
 interface TrayItem {
@@ -36,6 +37,8 @@ interface ConceptWebData {
   edges: ConceptEdge[];
   concepts?: TrayItem[];
   trayAlign?: string;
+  relations?: TrayItem[];
+  relationsAlign?: string;
 }
 
 interface ConceptWebProps {
@@ -95,6 +98,7 @@ interface ResolvedEdge {
   type: string;
   text?: string;
   image?: string;
+  assess?: AssessConfig;
 }
 
 // Build a map from node value string to position key(s)
@@ -169,7 +173,7 @@ function resolveEdges(
     for (const fk of finalFromKeys) {
       for (const tk of finalToKeys) {
         if (fk !== tk) {
-          resolved.push({ fromKey: fk, toKey: tk, type, text: edge.text, image: edge.image });
+          resolved.push({ fromKey: fk, toKey: tk, type, text: edge.text, image: edge.image, assess: edge.assess });
         }
       }
     }
@@ -195,9 +199,10 @@ function preprocessMarkdown(text: string): string {
 }
 
 export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
-  const { topic, instructions, anchor, connections, edges, concepts: items = [], trayAlign } = conceptWeb;
+  const { topic, instructions, anchor, connections, edges, concepts: items = [], trayAlign, relations = [], relationsAlign } = conceptWeb;
   const isDark = theme === "DARK";
   const hasItems = items.length > 0;
+  const hasRelations = relations.length > 0;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -208,6 +213,13 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
   const [placedItems, setPlacedItems] = useState<Record<string, number>>({});
   // Track item index currently being dragged off a node
   const [draggingItemIndex, setDraggingItemIndex] = useState<number | null>(null);
+
+  // Track which relations have been placed on which edges (edge index → relation index)
+  const [placedRelations, setPlacedRelations] = useState<Record<number, number>>({});
+  // Track relation index currently being dragged off an edge
+  const [draggingRelationIndex, setDraggingRelationIndex] = useState<number | null>(null);
+  // Whether a relation is actively being dragged (from tray or edge)
+  const [isDraggingRelation, setIsDraggingRelation] = useState(false);
 
   // Preload images so they're available instantly for drag badges
   const preloadedImages = useRef<Record<number, HTMLImageElement>>({});
@@ -313,6 +325,108 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
   const handleContainerDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setDraggingItemIndex(null);
+    setDraggingRelationIndex(null);
+    setIsDraggingRelation(false);
+    // If dragged off an edge and dropped on nothing, remove from that edge
+    const sourceEdge = draggingFromEdge.current;
+    if (sourceEdge !== null) {
+      draggingFromEdge.current = null;
+      setPlacedRelations(prev => {
+        const next = { ...prev };
+        delete next[sourceEdge];
+        return next;
+      });
+    }
+  }, []);
+
+  // Drop a relation onto an edge
+  const handleEdgeDrop = useCallback((e: React.DragEvent, edgeIndex: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDraggingRelationIndex(null);
+    setIsDraggingRelation(false);
+    const sourceEdge = draggingFromEdge.current;
+    draggingFromEdge.current = null;
+
+    const rawData = e.dataTransfer.getData("application/relation-json");
+    if (!rawData) return;
+    try {
+      const relationIndex: number = JSON.parse(rawData);
+      setPlacedRelations(prev => {
+        const next = { ...prev };
+        // Remove from source edge if dragged off one
+        if (sourceEdge !== null) delete next[sourceEdge];
+        // Remove this relation from any other edge
+        for (const k of Object.keys(next)) {
+          if (next[Number(k)] === relationIndex) {
+            delete next[Number(k)];
+          }
+        }
+        next[edgeIndex] = relationIndex;
+        return next;
+      });
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Drag a relation from the tray
+  const handleRelationTrayDragStart = useCallback((e: React.DragEvent, relationIndex: number, item: TrayItem) => {
+    e.dataTransfer.setData("application/relation-json", JSON.stringify(relationIndex));
+    e.dataTransfer.effectAllowed = "move";
+    setIsDraggingRelation(true);
+    const badge = document.createElement("div");
+    badge.style.cssText = `
+      display: flex; align-items: center; justify-content: center;
+      padding: ${4 * scale}px ${8 * scale}px; border-radius: ${12 * scale}px;
+      background: ${isDark ? "#1e3a5f" : "#dbeafe"}; color: ${isDark ? "#bfdbfe" : "#1e40af"};
+      position: fixed; top: -1000px; left: -1000px; white-space: nowrap;
+      font-size: ${fontSize * 0.75}rem; font-weight: 500;
+    `;
+    badge.textContent = item.text || item.value || "";
+    document.body.appendChild(badge);
+    badge.getBoundingClientRect();
+    e.dataTransfer.setDragImage(badge, badge.offsetWidth / 2, badge.offsetHeight / 2);
+    requestAnimationFrame(() => document.body.removeChild(badge));
+  }, [nodeSize, isDark, fontSize, scale]);
+
+  // Drag a placed relation off an edge — keep it in placedRelations until drop
+  const draggingFromEdge = useRef<number | null>(null);
+  const handleEdgeRelationDragStart = useCallback((e: React.DragEvent, edgeIndex: number) => {
+    const relationIndex = placedRelations[edgeIndex];
+    if (relationIndex === undefined) { e.preventDefault(); return; }
+    const item = relations[relationIndex];
+    if (!item) { e.preventDefault(); return; }
+    e.dataTransfer.setData("application/relation-json", JSON.stringify(relationIndex));
+    e.dataTransfer.effectAllowed = "move";
+    const badge = document.createElement("div");
+    badge.style.cssText = `
+      display: flex; align-items: center; justify-content: center;
+      padding: ${4 * scale}px ${8 * scale}px; border-radius: ${12 * scale}px;
+      background: ${isDark ? "#1e3a5f" : "#dbeafe"}; color: ${isDark ? "#bfdbfe" : "#1e40af"};
+      position: fixed; top: -1000px; left: -1000px; white-space: nowrap;
+      font-size: ${fontSize * 0.75}rem; font-weight: 500;
+    `;
+    badge.textContent = item.text || item.value || "";
+    document.body.appendChild(badge);
+    badge.getBoundingClientRect();
+    e.dataTransfer.setDragImage(badge, badge.offsetWidth / 2, badge.offsetHeight / 2);
+    requestAnimationFrame(() => document.body.removeChild(badge));
+    setDraggingRelationIndex(relationIndex);
+    draggingFromEdge.current = edgeIndex;
+    // Don't set isDraggingRelation here — onDrag will set it on actual movement
+  }, [placedRelations, relations, isDark, fontSize, scale]);
+
+  // Fires continuously during actual dragging (not on a simple click)
+  const handleEdgeRelationDrag = useCallback(() => {
+    if (!isDraggingRelation) setIsDraggingRelation(true);
+  }, [isDraggingRelation]);
+
+  // Reset if drag ends without a successful drop
+  const handleEdgeRelationDragEnd = useCallback(() => {
+    setDraggingRelationIndex(null);
+    setIsDraggingRelation(false);
+    draggingFromEdge.current = null;
   }, []);
 
   const createDragBadge = useCallback((item: TrayItem, itemIndex: number, sz: number) => {
@@ -400,6 +514,10 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
   // Set of placed item indices for muting in the tray (include in-flight item)
   const placedItemIndices = new Set(Object.values(placedItems));
   if (draggingItemIndex !== null) placedItemIndices.add(draggingItemIndex);
+
+  // Set of placed relation indices for muting in the tray
+  const placedRelationIndices = new Set(Object.values(placedRelations));
+  if (draggingRelationIndex !== null) placedRelationIndices.add(draggingRelationIndex);
 
   // Resolve value-based edges to position-key-based edges.
   // If edges is undefined/null, default to solid edges from anchor to all connections.
@@ -511,6 +629,24 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
         remainingExpected.splice(idx, 1);
       } else {
         unmatchedKeys.add(key);
+      }
+    }
+  }
+
+  // Edge assessment scoring — which edges are matched (green) or unmatched (red)
+  const matchedEdges = new Set<number>();
+  const unmatchedEdges = new Set<number>();
+  if (hasRelations) {
+    for (let i = 0; i < resolvedEdges.length; i++) {
+      const edge = resolvedEdges[i];
+      if (!edge.assess || edge.assess.method !== "value") continue;
+      const relationIdx = placedRelations[i];
+      if (relationIdx === undefined) continue;
+      const placedValue = relations[relationIdx]?.value || "";
+      if (placedValue === edge.assess.expected) {
+        matchedEdges.add(i);
+      } else {
+        unmatchedEdges.add(i);
       }
     }
   }
@@ -645,8 +781,8 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
       <div
         className="flex"
         style={{ flexDirection: outerFlexDir as any }}
-        onDragOver={hasItems ? handleDragOver : undefined}
-        onDrop={hasItems ? handleContainerDrop : undefined}
+        onDragOver={(hasItems || hasRelations) ? handleDragOver : undefined}
+        onDrop={(hasItems || hasRelations) ? handleContainerDrop : undefined}
       >
         <div
           ref={containerRef}
@@ -725,21 +861,27 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                       strokeDasharray={isDashed ? `${dashSize} ${gapSize}` : undefined}
                       markerEnd={isArrow ? "url(#arrowhead)" : undefined}
                     />
-                    {edge.image && (
-                      <image
-                        href={edge.image}
-                        x={midX - nodeSize * 0.2}
-                        y={midY - nodeSize * 0.2}
-                        width={nodeSize * 0.4}
-                        height={nodeSize * 0.4}
-                      />
-                    )}
-                    {edge.text && !edge.image && (() => {
-                      // Compute angle in degrees, keep text readable (not upside down)
+                    {/* Edge label — SVG text/image; hidden during relation drag or when selected as pill */}
+                    {!isDraggingRelation && (() => {
+                      const placedRel = hasRelations && placedRelations[i] !== undefined ? relations[placedRelations[i]] : null;
+                      const labelText = placedRel ? (placedRel.text || placedRel.value || "") : (edge.text || "");
+                      const labelImage = placedRel ? placedRel.image : edge.image;
+
+                      if (labelImage) {
+                        return (
+                          <image
+                            href={labelImage}
+                            x={midX - nodeSize * 0.2}
+                            y={midY - nodeSize * 0.2}
+                            width={nodeSize * 0.4}
+                            height={nodeSize * 0.4}
+                          />
+                        );
+                      }
+                      if (!labelText) return null;
                       let angle = Math.atan2(dy, dx) * (180 / Math.PI);
                       const flipped = angle > 90 || angle < -90;
                       if (flipped) angle += 180;
-                      // Available edge length between node borders
                       const edgeLen = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
                       const arrowMargin = isArrow ? markerSize : 0;
                       const maxWidth = Math.max(0, edgeLen - arrowMargin * 2);
@@ -747,7 +889,7 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                       const labelFontSize = fontSize * 0.85;
                       const charWidth = labelFontSize * 16 * 0.55;
                       const charsPerLine = Math.max(1, Math.floor(maxWidth / charWidth));
-                      const words = edge.text.split(' ');
+                      const words = labelText.split(' ');
                       const lines: string[] = [];
                       let current = '';
                       for (const word of words) {
@@ -762,15 +904,26 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                       if (current) lines.push(current);
                       const lineHeight = labelFontSize * 16 * 1.2;
                       const totalHeight = lines.length * lineHeight;
+
+                      let labelColor = edgeLabelColor;
+                      if (placedRel && edge.assess?.method === "value") {
+                        if (matchedEdges.has(i)) {
+                          labelColor = isDark ? "#4ade80" : "#16a34a";
+                        } else if (unmatchedEdges.has(i)) {
+                          labelColor = isDark ? "#f87171" : "#dc2626";
+                        }
+                      }
+
                       return (
                         <text
                           x={midX}
                           y={midY - gap - totalHeight + lineHeight}
                           textAnchor="middle"
                           dominantBaseline="alphabetic"
-                          fill={edgeLabelColor}
+                          fill={labelColor}
                           fontSize={`${labelFontSize}rem`}
                           transform={`rotate(${angle}, ${midX}, ${midY})`}
+                          style={{ pointerEvents: "none" }}
                         >
                           {lines.map((line, li) => (
                             <tspan key={li} x={midX} dy={li === 0 ? 0 : `${lineHeight}px`}>
@@ -785,6 +938,137 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
               })}
             </svg>
           )}
+
+          {/* Edge label drop zones — only visible during a relation drag */}
+          {isDraggingRelation && resolvedEdges.map((edge, i) => {
+            // Only show a drop zone on edges that have a label or assessment
+            if (!edge.text && !edge.image && !edge.assess) return null;
+            const from = positions[edge.fromKey];
+            const to = positions[edge.toKey];
+            if (!from || !to) return null;
+
+            const dx = to.x - from.x;
+            const dy = to.y - from.y;
+            const midX = (from.x + to.x) / 2;
+            const midY = (from.y + to.y) / 2;
+
+            // Match SVG label rotation: readable angle, flip if upside-down
+            let angle = Math.atan2(dy, dx) * (180 / Math.PI);
+            if (angle > 90 || angle < -90) angle += 180;
+
+            const relationIdx = placedRelations[i];
+            const hasPlacedRelation = relationIdx !== undefined;
+            const relation = hasPlacedRelation ? relations[relationIdx] : null;
+
+            // Show placed relation label, or fall back to edge's own label
+            const displayLabel = relation
+              ? (relation.text || relation.value || "")
+              : (edge.text || "");
+            const displayImage = relation?.image || (hasPlacedRelation ? undefined : edge.image);
+            const isEdgeAssessed = edge.assess?.method === "value";
+
+            // Assessment coloring when a relation has been placed
+            let bgColor = isDark ? "#3f3f46" : "#e4e4e7";
+            if (hasPlacedRelation && isEdgeAssessed) {
+              if (matchedEdges.has(i)) {
+                bgColor = isDark ? "#14532d" : "#dcfce7";
+              } else if (unmatchedEdges.has(i)) {
+                bgColor = isDark ? "#7f1d1d" : "#fee2e2";
+              }
+            }
+
+            const labelW = nodeSize * 0.9;
+            const labelH = nodeSize * 0.35;
+            const gap = 6 * scale;
+
+            return (
+              <div
+                key={`edge-drop-${i}`}
+                draggable={hasPlacedRelation}
+                onDragStart={hasPlacedRelation ? (e) => handleEdgeRelationDragStart(e, i) : undefined}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleEdgeDrop(e, i)}
+                style={{
+                  position: "absolute",
+                  left: midX - labelW / 2,
+                  top: midY - labelH - gap,
+                  width: labelW,
+                  height: labelH,
+                  borderRadius: `${12 * scale}px`,
+                  border: `${strokeWidth}px ${hasPlacedRelation ? "solid" : "dashed"} ${borderColor}`,
+                  background: bgColor,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: hasPlacedRelation ? "grab" : "default",
+                  userSelect: "none",
+                  zIndex: 5,
+                  transform: `rotate(${angle}deg)`,
+                  transformOrigin: `50% calc(100% + ${gap}px)`,
+                }}
+              >
+                {displayImage ? (
+                  <img
+                    src={displayImage}
+                    alt={displayLabel}
+                    style={{
+                      maxWidth: labelH * 0.8,
+                      maxHeight: labelH * 0.8,
+                      objectFit: "cover",
+                    }}
+                    draggable={false}
+                  />
+                ) : (
+                  <span
+                    style={{
+                      color: nodeTextColor,
+                      fontSize: `${fontSize * 0.75}rem`,
+                      textAlign: "center",
+                      lineHeight: 1.2,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {displayLabel}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+
+          {/* Draggable overlays on placed relation labels — drag off to return to tray */}
+          {hasRelations && resolvedEdges.map((edge, i) => {
+            if (placedRelations[i] === undefined) return null;
+            if (isDraggingRelation) return null;
+            const from = positions[edge.fromKey];
+            const to = positions[edge.toKey];
+            if (!from || !to) return null;
+
+            const midX = (from.x + to.x) / 2;
+            const midY = (from.y + to.y) / 2;
+            const hitSize = nodeSize * 0.6;
+
+            return (
+              <div
+                key={`rel-drag-${i}`}
+                draggable
+                onDragStart={(e) => handleEdgeRelationDragStart(e, i)}
+                onDrag={handleEdgeRelationDrag}
+                onDragEnd={handleEdgeRelationDragEnd}
+                style={{
+                  position: "absolute",
+                  left: midX - hitSize / 2,
+                  top: midY - hitSize / 2,
+                  width: hitSize,
+                  height: hitSize,
+                  cursor: "grab",
+                  zIndex: 6,
+                  background: "transparent",
+                }}
+              />
+            );
+          })}
 
           {/* DOM nodes */}
           {allEntries.map(({ key, data }) => {
@@ -856,6 +1140,56 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
         </div>
         {tray}
       </div>
+      {hasRelations && (() => {
+        const rAlign = relationsAlign || "bottom";
+        const rIsHorizontal = rAlign === "left" || rAlign === "right";
+        return (
+          <div
+            className={`flex flex-wrap gap-2 p-3 ${rIsHorizontal ? "flex-col items-start" : "flex-row justify-center"}`}
+            onDragOver={handleDragOver}
+            onDrop={handleContainerDrop}
+          >
+            {relations.map((item, index) => {
+              const isPlaced = placedRelationIndices.has(index);
+              return (
+                <div
+                  key={index}
+                  draggable={!isPlaced}
+                  onDragStart={(e) => handleRelationTrayDragStart(e, index, item)}
+                  className={`inline-flex items-center justify-center rounded-full font-medium cursor-grab select-none ${
+                    isPlaced
+                      ? (isDark
+                          ? "bg-zinc-700 text-zinc-500 cursor-default opacity-50"
+                          : "bg-gray-200 text-gray-400 cursor-default opacity-50")
+                      : (isDark
+                          ? "bg-blue-900 text-blue-200"
+                          : "bg-blue-100 text-blue-800")
+                  }`}
+                  style={{
+                    padding: `${4 * scale}px ${10 * scale}px`,
+                    fontSize: `${fontSize * 0.75}rem`,
+                    borderRadius: `${12 * scale}px`,
+                  }}
+                >
+                  {item.image ? (
+                    <img
+                      src={item.image}
+                      alt={item.text || item.value || ""}
+                      style={{
+                        maxHeight: nodeSize * 0.3,
+                        objectFit: "cover",
+                      }}
+                      draggable={false}
+                    />
+                  ) : (
+                    <span>{item.text || item.value}</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })()}
     </div>
   );
 }

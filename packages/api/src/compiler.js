@@ -151,6 +151,20 @@ export class Checker extends BasisChecker {
     });
   }
 
+  RELATIONS(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        resume([], node);
+      });
+    });
+  }
+
+  RELATION(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      resume([], node);
+    });
+  }
+
   FROM(node, options, resume) {
     this.visit(node.elts[0], options, async (e0, v0) => {
       this.visit(node.elts[1], options, async (e1, v1) => {
@@ -325,6 +339,24 @@ export class Transformer extends BasisTransformer {
     });
   }
 
+  RELATIONS(node, options, resume) {
+    this.visit(node.elts[0], options, (e0, v0) => {
+      this.visit(node.elts[1], options, (e1, v1) => {
+        const { align: relationsAlign, ...rest } = v1;
+        resume([], { ...rest, relations: v0, ...(relationsAlign && { relationsAlign }) });
+      });
+    });
+  }
+
+  RELATION(node, options, resume) {
+    this.visit(node.elts[0], options, (e0, v0) => {
+      if (v0.text && !v0.value) {
+        v0.value = v0.text;
+      }
+      resume([], v0);
+    });
+  }
+
   FROM(node, options, resume) {
     this.visit(node.elts[0], options, (e0, v0) => {
       this.visit(node.elts[1], options, (e1, v1) => {
@@ -353,7 +385,7 @@ export class Transformer extends BasisTransformer {
     this.visit(node.elts[0], options, (e0, v0) => {
       const data = options?.data || {};
       const val = v0.pop();
-      const { topic, instructions, connections = [], anchor, concepts = [], align, theme, edges } = val;
+      const { topic, instructions, connections = [], anchor, concepts = [], align, theme, edges, relations = [], relationsAlign } = val;
 
       const conceptWeb = {
         topic: topic || "",
@@ -363,6 +395,8 @@ export class Transformer extends BasisTransformer {
         ...(edges !== undefined && { edges }),
         concepts,
         trayAlign: align,
+        relations,
+        ...(relationsAlign && { relationsAlign }),
       };
 
       resume(e0, { conceptWeb, theme, ...data });

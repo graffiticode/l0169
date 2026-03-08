@@ -371,10 +371,7 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
   }, []);
 
   // Drag a relation from the tray
-  const handleRelationTrayDragStart = useCallback((e: React.DragEvent, relationIndex: number, item: TrayItem) => {
-    e.dataTransfer.setData("application/relation-json", JSON.stringify(relationIndex));
-    e.dataTransfer.effectAllowed = "move";
-    setIsDraggingRelation(true);
+  const createRelationDragBadge = useCallback((item: TrayItem) => {
     const badge = document.createElement("div");
     badge.style.cssText = `
       display: flex; align-items: center; justify-content: center;
@@ -383,12 +380,27 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
       position: fixed; top: -1000px; left: -1000px; white-space: nowrap;
       font-size: ${fontSize * 0.75}rem; font-weight: 500;
     `;
-    badge.textContent = item.text || item.value || "";
+    if (item.image) {
+      const img = document.createElement("img");
+      img.src = item.image;
+      img.style.cssText = `max-height: ${nodeSize * 0.3}px; object-fit: cover;`;
+      badge.appendChild(img);
+    } else {
+      badge.textContent = item.text || item.value || "";
+    }
+    return badge;
+  }, [isDark, fontSize, scale, nodeSize]);
+
+  const handleRelationTrayDragStart = useCallback((e: React.DragEvent, relationIndex: number, item: TrayItem) => {
+    e.dataTransfer.setData("application/relation-json", JSON.stringify(relationIndex));
+    e.dataTransfer.effectAllowed = "move";
+    setIsDraggingRelation(true);
+    const badge = createRelationDragBadge(item);
     document.body.appendChild(badge);
     badge.getBoundingClientRect();
     e.dataTransfer.setDragImage(badge, badge.offsetWidth / 2, badge.offsetHeight / 2);
     requestAnimationFrame(() => document.body.removeChild(badge));
-  }, [nodeSize, isDark, fontSize, scale]);
+  }, [createRelationDragBadge]);
 
   // Drag a placed relation off an edge — keep it in placedRelations until drop
   const draggingFromEdge = useRef<number | null>(null);
@@ -399,15 +411,7 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
     if (!item) { e.preventDefault(); return; }
     e.dataTransfer.setData("application/relation-json", JSON.stringify(relationIndex));
     e.dataTransfer.effectAllowed = "move";
-    const badge = document.createElement("div");
-    badge.style.cssText = `
-      display: flex; align-items: center; justify-content: center;
-      padding: ${4 * scale}px ${8 * scale}px; border-radius: ${12 * scale}px;
-      background: ${isDark ? "#1e3a5f" : "#dbeafe"}; color: ${isDark ? "#bfdbfe" : "#1e40af"};
-      position: fixed; top: -1000px; left: -1000px; white-space: nowrap;
-      font-size: ${fontSize * 0.75}rem; font-weight: 500;
-    `;
-    badge.textContent = item.text || item.value || "";
+    const badge = createRelationDragBadge(item);
     document.body.appendChild(badge);
     badge.getBoundingClientRect();
     e.dataTransfer.setDragImage(badge, badge.offsetWidth / 2, badge.offsetHeight / 2);
@@ -415,7 +419,7 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
     setDraggingRelationIndex(relationIndex);
     draggingFromEdge.current = edgeIndex;
     // Don't set isDraggingRelation here — onDrag will set it on actual movement
-  }, [placedRelations, relations, isDark, fontSize, scale]);
+  }, [placedRelations, relations, createRelationDragBadge]);
 
   // Fires continuously during actual dragging (not on a simple click)
   const handleEdgeRelationDrag = useCallback(() => {

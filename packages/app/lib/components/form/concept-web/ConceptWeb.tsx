@@ -741,6 +741,60 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
     </div>
   ) : null;
 
+  // Relations tray layout
+  const rAlign = (relationsAlign || "bottom").toLowerCase();
+  const rIsVertical = rAlign === "left" || rAlign === "right";
+  const relationsOuterDir = rIsVertical
+    ? (rAlign === "right" ? "row" : "row-reverse")
+    : (rAlign === "bottom" ? "column" : "column-reverse");
+
+  const relationsTray = hasRelations ? (
+    <div
+      className={`flex flex-wrap gap-2 p-3 ${rIsVertical ? "flex-col items-center justify-center" : "flex-row justify-center"}`}
+      onDragOver={handleDragOver}
+      onDrop={handleContainerDrop}
+    >
+      {relations.map((item, index) => {
+        const isPlaced = placedRelationIndices.has(index);
+        return (
+          <div
+            key={index}
+            draggable={!isPlaced}
+            onDragStart={(e) => handleRelationTrayDragStart(e, index, item)}
+            className={`inline-flex items-center justify-center rounded-full font-medium cursor-grab select-none ${
+              isPlaced
+                ? (isDark
+                    ? "bg-zinc-700 text-zinc-500 cursor-default opacity-50"
+                    : "bg-gray-200 text-gray-400 cursor-default opacity-50")
+                : (isDark
+                    ? "bg-blue-900 text-blue-200"
+                    : "bg-blue-100 text-blue-800")
+            }`}
+            style={{
+              padding: `${4 * scale}px ${10 * scale}px`,
+              fontSize: `${fontSize * 0.75}rem`,
+              borderRadius: `${12 * scale}px`,
+            }}
+          >
+            {item.image ? (
+              <img
+                src={item.image}
+                alt={item.text || item.value || ""}
+                style={{
+                  maxHeight: nodeSize * 0.3,
+                  objectFit: "cover",
+                }}
+                draggable={false}
+              />
+            ) : (
+              <span>{item.text || item.value}</span>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  ) : null;
+
   return (
     <div className="flex flex-col gap-2">
       {(topic || instructions) && (
@@ -784,9 +838,13 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
       )}
       <div
         className="flex"
-        style={{ flexDirection: outerFlexDir as any }}
+        style={{ flexDirection: relationsOuterDir as any }}
         onDragOver={(hasItems || hasRelations) ? handleDragOver : undefined}
         onDrop={(hasItems || hasRelations) ? handleContainerDrop : undefined}
+      >
+      <div
+        className="flex"
+        style={{ flexDirection: outerFlexDir as any, flex: 1 }}
       >
         <div
           ref={containerRef}
@@ -1192,56 +1250,8 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
         </div>
         {tray}
       </div>
-      {hasRelations && (() => {
-        const rAlign = relationsAlign || "bottom";
-        const rIsHorizontal = rAlign === "left" || rAlign === "right";
-        return (
-          <div
-            className={`flex flex-wrap gap-2 p-3 ${rIsHorizontal ? "flex-col items-start" : "flex-row justify-center"}`}
-            onDragOver={handleDragOver}
-            onDrop={handleContainerDrop}
-          >
-            {relations.map((item, index) => {
-              const isPlaced = placedRelationIndices.has(index);
-              return (
-                <div
-                  key={index}
-                  draggable={!isPlaced}
-                  onDragStart={(e) => handleRelationTrayDragStart(e, index, item)}
-                  className={`inline-flex items-center justify-center rounded-full font-medium cursor-grab select-none ${
-                    isPlaced
-                      ? (isDark
-                          ? "bg-zinc-700 text-zinc-500 cursor-default opacity-50"
-                          : "bg-gray-200 text-gray-400 cursor-default opacity-50")
-                      : (isDark
-                          ? "bg-blue-900 text-blue-200"
-                          : "bg-blue-100 text-blue-800")
-                  }`}
-                  style={{
-                    padding: `${4 * scale}px ${10 * scale}px`,
-                    fontSize: `${fontSize * 0.75}rem`,
-                    borderRadius: `${12 * scale}px`,
-                  }}
-                >
-                  {item.image ? (
-                    <img
-                      src={item.image}
-                      alt={item.text || item.value || ""}
-                      style={{
-                        maxHeight: nodeSize * 0.3,
-                        objectFit: "cover",
-                      }}
-                      draggable={false}
-                    />
-                  ) : (
-                    <span>{item.text || item.value}</span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        );
-      })()}
+      {relationsTray}
+      </div>
     </div>
   );
 }

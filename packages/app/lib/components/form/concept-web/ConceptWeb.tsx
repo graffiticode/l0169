@@ -490,9 +490,12 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
     for (const key of group.keys) {
       if (hasItems && placedItems[key] !== undefined) {
         placedByKey[key] = items[placedItems[key]]?.value || "";
-      } else if (!hasItems) {
+      } else {
+        // Use the node's own value if it has one (scores on init)
         const data = key === "anchor" ? anchor : connections[parseInt(key)];
-        placedByKey[key] = data?.value || "";
+        if (data?.value) {
+          placedByKey[key] = data.value;
+        }
       }
     }
 
@@ -517,15 +520,10 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
     if (!data.assess) return nodeBackground;
     if (data.assess.method !== "value") return nodeBackground;
 
-    // Check if something is placed
-    let hasPlaced = false;
-    if (hasItems && placedItems[key] !== undefined) {
-      hasPlaced = true;
-    } else if (!hasItems) {
-      hasPlaced = true;
-    }
-
-    if (!hasPlaced) return nodeBackground;
+    // Check if something is placed or the node has its own value
+    const hasPlacedItem = hasItems && placedItems[key] !== undefined;
+    const hasOwnValue = !!data.value;
+    if (!hasPlacedItem && !hasOwnValue) return nodeBackground;
 
     if (matchedKeys.has(key)) {
       return isDark ? "#14532d" : "#dcfce7"; // green

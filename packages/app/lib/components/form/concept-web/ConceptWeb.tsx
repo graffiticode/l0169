@@ -947,14 +947,8 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
             const to = positions[edge.toKey];
             if (!from || !to) return null;
 
-            const dx = to.x - from.x;
-            const dy = to.y - from.y;
             const midX = (from.x + to.x) / 2;
             const midY = (from.y + to.y) / 2;
-
-            // Match SVG label rotation: readable angle, flip if upside-down
-            let angle = Math.atan2(dy, dx) * (180 / Math.PI);
-            if (angle > 90 || angle < -90) angle += 180;
 
             const relationIdx = placedRelations[i];
             const hasPlacedRelation = relationIdx !== undefined;
@@ -977,9 +971,78 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
               }
             }
 
-            const labelW = nodeSize * 0.9;
-            const labelH = nodeSize * 0.35;
-            const gap = 6 * scale;
+            // For images: square centered on midpoint, matching SVG image size
+            if (displayImage) {
+              const imgSize = nodeSize * 0.4;
+              return (
+                <div
+                  key={`edge-drop-${i}`}
+                  draggable={hasPlacedRelation}
+                  onDragStart={hasPlacedRelation ? (e) => handleEdgeRelationDragStart(e, i) : undefined}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleEdgeDrop(e, i)}
+                  style={{
+                    position: "absolute",
+                    left: midX - imgSize / 2,
+                    top: midY - imgSize / 2,
+                    width: imgSize,
+                    height: imgSize,
+                    borderRadius: `${4 * scale}px`,
+                    border: `${strokeWidth}px ${hasPlacedRelation ? "solid" : "dashed"} ${borderColor}`,
+                    background: bgColor,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: hasPlacedRelation ? "grab" : "default",
+                    userSelect: "none",
+                    zIndex: 5,
+                  }}
+                >
+                  <img
+                    src={displayImage}
+                    alt={displayLabel}
+                    style={{
+                      maxWidth: imgSize * 0.8,
+                      maxHeight: imgSize * 0.8,
+                      objectFit: "cover",
+                    }}
+                    draggable={false}
+                  />
+                </div>
+              );
+            }
+
+            // For text: match SVG label word-wrap dimensions, centered on midpoint
+            const x1 = from.x, y1 = from.y, x2 = to.x, y2 = to.y;
+            const edgeLen = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+            const isArrow = edge.type === "solid-arrow" || edge.type === "dashed-arrow";
+            const markerSize = 6 * scale;
+            const arrowMargin = isArrow ? markerSize : 0;
+            const maxWidth = Math.max(0, edgeLen - arrowMargin * 2);
+            const labelFontSize = fontSize * 0.85;
+            const charWidth = labelFontSize * 16 * 0.55;
+            const charsPerLine = Math.max(1, Math.floor(maxWidth / charWidth));
+            const words = (displayLabel || "").split(' ');
+            const lines: string[] = [];
+            let current = '';
+            for (const word of words) {
+              const test = current ? current + ' ' + word : word;
+              if (test.length <= charsPerLine) {
+                current = test;
+              } else {
+                if (current) lines.push(current);
+                current = word;
+              }
+            }
+            if (current) lines.push(current);
+            const lineHeight = labelFontSize * 16 * 1.2;
+            const totalHeight = lines.length * lineHeight;
+            // Width: widest line
+            const longestLine = lines.reduce((a, b) => a.length > b.length ? a : b, "");
+            const textWidth = longestLine.length * charWidth;
+            const pad = 8 * scale;
+            const dropW = textWidth + pad * 2;
+            const dropH = totalHeight + pad;
 
             return (
               <div
@@ -990,11 +1053,11 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                 onDrop={(e) => handleEdgeDrop(e, i)}
                 style={{
                   position: "absolute",
-                  left: midX - labelW / 2,
-                  top: midY - labelH - gap,
-                  width: labelW,
-                  height: labelH,
-                  borderRadius: `${12 * scale}px`,
+                  left: midX - dropW / 2,
+                  top: midY - dropH / 2,
+                  width: dropW,
+                  height: dropH,
+                  borderRadius: `${4 * scale}px`,
                   border: `${strokeWidth}px ${hasPlacedRelation ? "solid" : "dashed"} ${borderColor}`,
                   background: bgColor,
                   display: "flex",
@@ -1003,36 +1066,21 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                   cursor: hasPlacedRelation ? "grab" : "default",
                   userSelect: "none",
                   zIndex: 5,
-                  transform: `rotate(${angle}deg)`,
-                  transformOrigin: `50% calc(100% + ${gap}px)`,
                 }}
               >
-                {displayImage ? (
-                  <img
-                    src={displayImage}
-                    alt={displayLabel}
-                    style={{
-                      maxWidth: labelH * 0.8,
-                      maxHeight: labelH * 0.8,
-                      objectFit: "cover",
-                    }}
-                    draggable={false}
-                  />
-                ) : (
-                  <span
-                    style={{
-                      color: nodeTextColor,
-                      fontSize: `${fontSize * 0.75}rem`,
-                      textAlign: "center",
-                      lineHeight: 1.2,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {displayLabel}
-                  </span>
-                )}
+                <span
+                  style={{
+                    color: nodeTextColor,
+                    fontSize: `${labelFontSize}rem`,
+                    textAlign: "center",
+                    lineHeight: 1.2,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: lines.length <= 1 ? "nowrap" : "normal",
+                  }}
+                >
+                  {displayLabel}
+                </span>
               </div>
             );
           })}

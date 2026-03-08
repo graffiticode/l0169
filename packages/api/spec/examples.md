@@ -57,7 +57,7 @@
 39. Create a concept web with an assessed anchor and four assessed connections.
 40. Create a concept web where only the anchor is assessed and connections are display-only.
 41. Create a concept web where only the connections are assessed and the anchor is display-only.
-42. Create a concept web with five assessed connections and an assessed anchor, all using method 'value'. *
+42. Create a concept web with five assessed connections and an assessed anchor, all using method 'value'.
 43. Create a concept web with three connections where expected values are multi-word strings.
 
 ## Category 6: Concepts Tray / Drag-and-Drop (44–57)
@@ -87,8 +87,8 @@
 63. Create a concepts tray with images aligned to the top of the diagram.
 64. Create a concept web with a mix of image concepts and text concepts in the tray.
 65. Create a drag-and-drop concept web where image concepts have values that differ from the image URL.
-66. Create a concept web with an image on the anchor node. *
-67. Create a concept web with images on connections. *
+66. Create a concept web with an image on the anchor node.
+67. Create a concept web with images on connections.
 
 ## Category 8: Theme (68–73)
 
@@ -99,44 +99,44 @@
 72. Create a dark-themed drag-and-drop concept web with assessment.
 73. Create a light-themed concept web with a topic, instructions, and three connections.
 
-## Category 9: Edges — Basics (74–85) *
+## Category 9: Edges — Basics (74–85)
 
-74. Create a concept web with a single solid edge from the anchor to one connection. *
-75. Create a concept web with solid edges from the anchor to all connections using the edges keyword. *
-76. Create a concept web with dashed edges from the anchor to all connections. *
-77. Create a concept web with solid-arrow edges from the anchor to all connections. *
-78. Create a concept web with dashed-arrow edges from the anchor to all connections. *
-79. Create a concept web with an empty edges list so no edges are rendered. *
-80. Create a concept web with edges using the '*' wildcard on the to field to connect the anchor to all connections. *
-81. Create a concept web with edges using the '*' wildcard on the from field. *
-82. Create a concept web with an edge where from is a list of two node values. *
-83. Create a concept web with an edge where to is a list of two node values. *
-84. Create a concept web with an edge that has a text label at the midpoint. *
-85. Create a concept web with an edge that has an image at the midpoint. *
+74. Create a concept web with a single solid edge from the anchor to one connection.
+75. Create a concept web with solid edges from the anchor to all connections using the edges keyword.
+76. Create a concept web with dashed edges from the anchor to all connections.
+77. Create a concept web with solid-arrow edges from the anchor to all connections.
+78. Create a concept web with dashed-arrow edges from the anchor to all connections.
+79. Create a concept web with an empty edges list so no edges are rendered.
+80. Create a concept web with edges using the '*' wildcard on the to field to connect the anchor to all connections.
+81. Create a concept web with edges using the '*' wildcard on the from field.
+82. Create a concept web with an edge where from is a list of two node values.
+83. Create a concept web with an edge where to is a list of two node values.
+84. Create a concept web with an edge that has a text label at the midpoint.
+85. Create a concept web with an edge that has an image at the midpoint.
 
-## Category 10: Edges — Combinations (86–95) *
+## Category 10: Edges — Combinations (86–95)
 
-86. Create a concept web with mixed edge types — some solid and some dashed. *
-87. Create a concept web with a peer-to-peer edge between two connections, not through the anchor. *
-88. Create a concept web with solid edges from anchor to all connections plus a dashed peer-to-peer edge between two connections. *
-89. Create a concept web with edges where each edge has a different text label. *
-90. Create a concept web with edges using '*' wildcard from the anchor and one specific peer edge with a text label. *
-91. Create a concept web with solid-arrow edges from anchor to connections and a dashed-arrow edge between two connections. *
-92. Create a concept web with edges where from and to both use lists of multiple node values. *
-93. Create a concept web with edges that mix solid, dashed, solid-arrow, and dashed-arrow types. *
-94. Create a concept web with a peer-to-peer edge that has both a text label and a specific type. *
-95. Create a concept web with edges where one edge uses '*' wildcard and another uses a specific list for from. *
+86. Create a concept web with mixed edge types — some solid and some dashed.
+87. Create a concept web with a peer-to-peer edge between two connections, not through the anchor.
+88. Create a concept web with solid edges from anchor to all connections plus a dashed peer-to-peer edge between two connections.
+89. Create a concept web with edges where each edge has a different text label.
+90. Create a concept web with edges using '*' wildcard from the anchor and one specific peer edge with a text label.
+91. Create a concept web with solid-arrow edges from anchor to connections and a dashed-arrow edge between two connections.
+92. Create a concept web with edges where from and to both use lists of multiple node values.
+93. Create a concept web with edges that mix solid, dashed, solid-arrow, and dashed-arrow types.
+94. Create a concept web with a peer-to-peer edge that has both a text label and a specific type.
+95. Create a concept web with edges where one edge uses '*' wildcard and another uses a specific list for from.
 
-## Category 11: Edges + Other Features (96–103) *
+## Category 11: Edges + Other Features (96–103)
 
-96. Create a concept web with custom edges and assessment on all nodes. *
-97. Create a drag-and-drop concept web with custom edges and a concepts tray. *
-98. Create a concept web with custom edges, dark theme, topic, and instructions. *
-99. Create a concept web with dashed edges, assessment, and a left-aligned concepts tray. *
-100. Create a drag-and-drop concept web with custom edges, blank nodes, assessment, and a right-aligned concepts tray with distractors. *
-101. Create a concept web with mixed edge types, text labels on edges, and assessment on all nodes. *
-102. Create a concept web with solid-arrow edges, an image on one edge, and a concepts tray with images. *
-103. Create a concept web with custom edges, light theme, topic, instructions, and images on connections. *
+96. Create a concept web with custom edges and assessment on all nodes.
+97. Create a drag-and-drop concept web with custom edges and a concepts tray.
+98. Create a concept web with custom edges, dark theme, topic, and instructions.
+99. Create a concept web with dashed edges, assessment, and a left-aligned concepts tray.
+100. Create a drag-and-drop concept web with custom edges, blank nodes, assessment, and a right-aligned concepts tray with distractors.
+101. Create a concept web with mixed edge types, text labels on edges, and assessment on all nodes.
+102. Create a concept web with solid-arrow edges, an image on one edge, and a concepts tray with images.
+103. Create a concept web with custom edges, light theme, topic, instructions, and images on connections.
 
 ## Category 12: Full Feature Compositions (104–112)
 
@@ -147,8 +147,8 @@
 108. Create a concept web with a topic, five connections with assessment, and a concepts tray with five items plus two distractors aligned to the left.
 109. Create a concept web with a topic, instructions, dark theme, anchor, and four connections. No assessment.
 110. Create a concept web with a topic, anchor with text override, three connections with text overrides, and assessment on all nodes using different expected values.
-111. Create a fully featured concept web with topic, markdown instructions, dark theme, custom edges with mixed types and text labels, assessed anchor and connections, and a bottom-aligned concepts tray with image concepts and text distractors. *
-112. Create a drag-and-drop concept web with topic, instructions, light theme, solid-arrow edges from anchor to all connections, dashed peer-to-peer edges with labels, blank assessed nodes, and a right-aligned concepts tray with matching concepts. *
+111. Create a fully featured concept web with topic, markdown instructions, dark theme, custom edges with mixed types and text labels, assessed anchor and connections, and a bottom-aligned concepts tray with image concepts and text distractors.
+112. Create a drag-and-drop concept web with topic, instructions, light theme, solid-arrow edges from anchor to all connections, dashed peer-to-peer edges with labels, blank assessed nodes, and a right-aligned concepts tray with matching concepts.
 
 ## Category 13: Edge Assessment (113–116) *
 

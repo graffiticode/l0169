@@ -1,6 +1,6 @@
 # L0169 RAG Training Examples
 
-132 example prompts for training a RAG model on the L0169 concept web assessment language.
+150 example prompts for training a RAG model on the L0169 concept web assessment language.
 
 ## Category 1: Minimal / Structural Basics (1–8)
 
@@ -181,3 +181,33 @@
 
 131. Create a drag-and-drop concept web with a concepts tray aligned right and a relations tray aligned bottom, with assessment on both nodes and edges.
 132. Create a fully featured drag-and-drop concept web with topic, markdown instructions, dark theme, blank assessed nodes with a concepts tray, assessed edges with mixed types, a relations tray with text overrides and distractors, concepts aligned right, and relations aligned bottom.
+
+## Category 17: Styling — Atomic (133–138) *
+
+133. Create a concept web with an anchor that uses w and h to set a custom size. *
+134. Create a concept web with an anchor using rounded 'full' to make it circular. *
+135. Create a concept web with an anchor that has a bg background color set. *
+136. Create a concept web with an anchor that uses color to set the text color. *
+137. Create a concept web with an anchor that uses border to set the border color. *
+138. Create a concept web with an anchor using rounded 'none' for sharp corners. *
+
+## Category 18: Styling — On Different Elements (139–142) *
+
+139. Create a concept web with bg and color applied to individual connections. *
+140. Create a concept web with w, h, and rounded 'full' on concepts in the tray. *
+141. Create a concept web with bg and border on relation labels in the tray. *
+142. Create a concept web with bg applied to edges. *
+
+## Category 19: Styling — Container Defaults (143–145) *
+
+143. Create a concept web where the connections list has bg and color defaults applied to all children. *
+144. Create a concept web where the connections list has style defaults but one connection overrides with its own bg. *
+145. Create a concept web where the concepts list has w, h, and rounded 'full' defaults for all tray items. *
+
+## Category 20: Styling — Combinations and Full Feature (146–150) *
+
+146. Create a concept web with an anchor using w, h, rounded, bg, color, and border all together. *
+147. Create a concept web where the anchor is styled differently from connections using different bg and rounded values. *
+148. Create a concept web with styled connections, styled concepts tray, and styled relation labels, each with different colors. *
+149. Create a concept web with styled nodes, custom edges, assessment, and a concepts tray — combining styling with existing features. *
+150. Create a fully featured concept web with topic, instructions, dark theme, a circular styled anchor, rectangular styled connections with container defaults, custom edges, assessed nodes, a concepts tray with styled items, and a relations tray with styled labels. *

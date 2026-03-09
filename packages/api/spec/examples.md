@@ -1,6 +1,6 @@
 # L0169 RAG Training Examples
 
-150 example prompts for training a RAG model on the L0169 concept web assessment language.
+161 example prompts for training a RAG model on the L0169 concept web assessment language.
 
 ## Category 1: Minimal / Structural Basics (1–8)
 
@@ -182,32 +182,49 @@
 131. Create a drag-and-drop concept web with a concepts tray aligned right and a relations tray aligned bottom, with assessment on both nodes and edges.
 132. Create a fully featured drag-and-drop concept web with topic, markdown instructions, dark theme, blank assessed nodes with a concepts tray, assessed edges with mixed types, a relations tray with text overrides and distractors, concepts aligned right, and relations aligned bottom.
 
-## Category 17: Styling — Atomic (133–138) *
+## Category 17: Styling — Atomic (133–138)
 
-133. Create a concept web with an anchor that uses w and h to set a custom size. *
-134. Create a concept web with an anchor using rounded 'full' to make it circular. *
-135. Create a concept web with an anchor that has a bg background color set. *
-136. Create a concept web with an anchor that uses color to set the text color. *
-137. Create a concept web with an anchor that uses border to set the border color. *
-138. Create a concept web with an anchor using rounded 'none' for sharp corners. *
+133. Create a concept web with an anchor that uses w and h to set a custom size.
+134. Create a concept web with an anchor using rounded 'full' to make it circular.
+135. Create a concept web with an anchor that has a bg background color set.
+136. Create a concept web with an anchor that uses color to set the text color.
+137. Create a concept web with an anchor that uses border to set the border color.
+138. Create a concept web with an anchor using rounded 'none' for sharp corners.
 
-## Category 18: Styling — On Different Elements (139–142) *
+## Category 18: Styling — On Different Elements (139–142)
 
-139. Create a concept web with bg and color applied to individual connections. *
-140. Create a concept web with w, h, and rounded 'full' on concepts in the tray. *
-141. Create a concept web with bg and border on relation labels in the tray. *
-142. Create a concept web with bg applied to edges. *
+139. Create a concept web with bg and color applied to individual connections.
+140. Create a concept web with w, h, and rounded 'full' on concepts in the tray.
+141. Create a concept web with bg and border on relation labels in the tray.
+142. Create a concept web with bg applied to edges.
 
-## Category 19: Styling — Container Defaults (143–145) *
+## Category 19: Styling — Container Defaults (143–145)
 
-143. Create a concept web where the connections list has bg and color defaults applied to all children. *
-144. Create a concept web where the connections list has style defaults but one connection overrides with its own bg. *
-145. Create a concept web where the concepts list has w, h, and rounded 'full' defaults for all tray items. *
+143. Create a concept web where the connections list has bg and color defaults applied to all children.
+144. Create a concept web where the connections list has style defaults but one connection overrides with its own bg.
+145. Create a concept web where the concepts list has w, h, and rounded 'full' defaults for all tray items.
 
-## Category 20: Styling — Combinations and Full Feature (146–150) *
+## Category 20: Styling — Combinations and Full Feature (146–150)
 
-146. Create a concept web with an anchor using w, h, rounded, bg, color, and border all together. *
-147. Create a concept web where the anchor is styled differently from connections using different bg and rounded values. *
-148. Create a concept web with styled connections, styled concepts tray, and styled relation labels, each with different colors. *
-149. Create a concept web with styled nodes, custom edges, assessment, and a concepts tray — combining styling with existing features. *
-150. Create a fully featured concept web with topic, instructions, dark theme, a circular styled anchor, rectangular styled connections with container defaults, custom edges, assessed nodes, a concepts tray with styled items, and a relations tray with styled labels. *
+146. Create a concept web with an anchor using w, h, rounded, bg, color, and border all together.
+147. Create a concept web where the anchor is styled differently from connections using different bg and rounded values.
+148. Create a concept web with styled connections, styled concepts tray, and styled relation labels, each with different colors.
+149. Create a concept web with styled nodes, custom edges, assessment, and a concepts tray — combining styling with existing features.
+150. Create a fully featured concept web with topic, instructions, dark theme, a circular styled anchor, rectangular styled connections with container defaults, custom edges, assessed nodes, a concepts tray with styled items, and a relations tray with styled labels.
+
+## Category 21: Styling — Additional Rounded Presets and Gaps (151–157) *
+
+151. Create a concept web with an anchor using rounded 'xl' for extra-large border radius. *
+152. Create a concept web with an anchor using a raw CSS rounded value like '50% / 25%' for custom border radius. *
+153. Create a concept web with an anchor using rounded 'sm' for small border radius. *
+154. Create a concept web where the relations list has bg, color, and border defaults applied to all relation children. *
+155. Create a concept web where the edges list has style defaults applied to all edge children. *
+156. Create a concept web with a relation that uses bg, color, and border together for full styling. *
+157. Create a concept web where relation styles (bg, color, border) carry through to the edge label when placed. *
+
+## Category 22: Styling — Cross-Feature Interactions (158–161) *
+
+158. Create a concept web where nodes have custom bg colors and assessment is active, showing that green/red assessment overrides the custom bg. *
+159. Create a concept web with bg and color applied to concepts in the tray. *
+160. Create a concept web where the relations list has style defaults but one relation overrides with its own bg. *
+161. Create a concept web where the concepts list, connections list, and relations list each have different container-level style defaults. *

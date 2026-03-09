@@ -33,13 +33,15 @@ L0169 is a Graffiticode dialect for authoring interactive concept web assessment
 - Relations use `value` for scoring; `text` or `image` override the display, same pattern as `concept`
 - Add descriptive comments using the pipe symbol `|`
 - Use `w` and `h` to set node size in Tailwind spacing units (1 unit = 4px): `w 24` = 96px wide
-- Use `rounded` to set border radius: `"none"`, `"sm"`, `"md"` (default), `"lg"`, `"xl"`, `"2xl"`, `"3xl"`, `"full"` (circle)
+- Use `rounded` to set border radius: `"none"`, `"xs"`, `"sm"`, `"md"` (default for nodes), `"lg"`, `"xl"`, `"2xl"`, `"3xl"`, `"full"` (circle). Relations default to `"xs"`. Raw CSS is also accepted (e.g. `"50% / 25%"`)
 - Use `bg` to set background color with a Tailwind color name: `bg 'blue-500'`
 - Use `color` to set text color: `color 'white'`
 - Use `border` to set border color: `border 'zinc-400'`
 - Style keywords can be applied to anchor, connections, concepts, edges, and relations
 - When style keywords are used on a list container (e.g. `connections`), they set defaults for all children; per-item overrides win
-- Default node shape is a rounded rectangle; use `rounded 'full'` for circles
+- Default node shape is a rounded rectangle (`"md"`); use `rounded 'full'` for circles
+- Relation styles (`bg`, `color`, `border`, `rounded`) apply to the tray badge and carry through to the edge label when placed
+- Assessment green/red overrides custom `bg` when active; custom `bg` shows in neutral state only
 
 ## Example Patterns
 
@@ -87,6 +89,32 @@ relations [
   relation value 'inhibits' image 'https://...' {}
 ] align BOTTOM {}
 ```
+
+Styled relations with custom colors:
+
+```
+relations [
+  relation value 'activates' bg 'green-100' color 'green-800' {},
+  relation value 'inhibits' bg 'red-100' color 'red-800' {}
+] align BOTTOM {}
+```
+
+## Node Styling
+
+Use `w`, `h`, `rounded`, `bg`, `color`, and `border` to style nodes and relations.
+Style keywords on list containers (`connections`, `concepts`, `edges`, `relations`)
+set defaults for all children; per-item overrides win.
+
+```
+anchor text 'Hub' w 28 h 28 bg 'indigo-500' color 'white' rounded 'xl' {}
+connections [
+  connection value 'A' text 'A' bg 'red-200' {},
+  connection value 'B' text 'B' {}
+] w 24 h 12 bg 'blue-100' rounded 'lg' {}
+```
+
+In this example, connection A gets `bg 'red-200'` (override) while B gets
+`bg 'blue-100'` (shared default). Both get `w 24`, `h 12`, `rounded 'lg'`.
 
 ## Concept Web Assessments
 

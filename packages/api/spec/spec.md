@@ -79,12 +79,23 @@ anchor text 'Hub' {}
 ### connections
 
 Defines a list of peripheral connection nodes arranged radially around the anchor.
+Style keywords (`w`, `h`, `rounded`, `bg`, `color`, `border`) on the continuation
+set defaults for all children; per-connection overrides win.
 
 ```
 connections [
   connection text 'Foo' {},
   connection text 'Bar' {}
 ] {}
+```
+
+With shared styles:
+
+```
+connections [
+  connection value 'A' bg 'red-200' {},
+  connection value 'B' {}
+] w 24 h 12 bg 'blue-100' rounded 'lg' {}
 ```
 
 ### connection
@@ -145,7 +156,8 @@ expected 'Hub'
 ### concepts
 
 Defines a list of tray concepts that students can drag onto concept web nodes.
-Concepts render as badges in a tray alongside the diagram.
+Concepts render as badges in a tray alongside the diagram. Style keywords on the
+continuation set defaults for all children.
 
 ```
 concepts [
@@ -186,6 +198,7 @@ align RIGHT
 Defines a list of edge definitions for custom edge rendering. When omitted,
 solid edges are automatically drawn from the anchor to each connection. When
 provided (even as an empty list), only the specified edges are rendered.
+Style keywords on the continuation set defaults for all children.
 
 Assessment validation considers edge properties: positions with identical
 edge configurations (same type, text, image, and connected nodes) are
@@ -246,7 +259,8 @@ type 'dashed-arrow'
 
 Defines a list of relation labels that students can drag onto edges. Relations
 render as badges in a tray alongside the diagram, similar to `concepts` but for
-edges. Use `align` to position the relations tray.
+edges. Use `align` to position the relations tray. Style keywords on the
+continuation set defaults for all children.
 
 ```
 relations [
@@ -258,13 +272,16 @@ relations [
 ### relation
 
 Defines a single relation label (arity 1). Properties like `value`, `text`,
-and `image` are passed through the pipeline. The `value` is used for scoring;
-`text` or `image` override the display.
+`image`, and style keywords (`bg`, `color`, `border`, `rounded`) are passed
+through the pipeline. The `value` is used for scoring; `text` or `image`
+override the display. Style keywords apply to the tray badge and carry through
+to the edge label when placed.
 
 ```
 relation value 'causes' {}
 relation value 'inhibits' text 'Inhibits →' {}
 relation value 'enables' image 'https://...' {}
+relation value 'activates' bg 'green-100' color 'green-800' border 'green-400' {}
 ```
 
 ### w
@@ -287,12 +304,15 @@ h 12
 
 ### rounded
 
-Sets the border radius preset. Accepted values: `"none"`, `"sm"`, `"md"` (default),
-`"lg"`, `"xl"`, `"2xl"`, `"3xl"`, `"full"` (circle).
+Sets the border radius preset. Accepted values: `"none"`, `"xs"`, `"sm"`,
+`"md"` (default for nodes), `"lg"`, `"xl"`, `"2xl"`, `"3xl"`, `"full"` (circle).
+Relations default to `"xs"`. Raw CSS values are also accepted as passthrough
+(e.g. `"50% / 25%"` for different horizontal/vertical radii).
 
 ```
 rounded 'lg'
 rounded 'full'
+rounded '50% / 25%'
 ```
 
 ### bg
@@ -376,6 +396,35 @@ concepts [
   concept text 'Foo' {},
   concept text 'Bar' {}
 ] align RIGHT {}..
+```
+
+A styled concept web with custom colors and shapes:
+
+```
+topic 'Styled Web'
+anchor text 'Hub' w 28 h 28 bg 'indigo-500' color 'white' rounded 'xl' {}
+connections [
+  connection value 'A' text 'A' bg 'red-200' {},
+  connection value 'B' text 'B' {},
+  connection value 'C' text 'C' {}
+] w 24 h 12 bg 'blue-100' rounded 'lg' {}..
+```
+
+A concept web with styled relation labels:
+
+```
+topic 'Styled Relations'
+anchor value 'Cell' text 'Cell' {}
+connections [
+  connection value 'Nucleus' text 'Nucleus' {}
+]
+edges [
+  edge from 'Cell' to 'Nucleus' type 'solid-arrow' assess [method 'value' expected 'activates'] {}
+]
+relations [
+  relation value 'activates' bg 'green-100' color 'green-800' {},
+  relation value 'inhibits' bg 'red-100' color 'red-800' {}
+] align BOTTOM {}..
 ```
 
 A concept web with draggable relation labels on edges:

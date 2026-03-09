@@ -40,6 +40,7 @@ export function twSpacingToPx(units: number): number {
 
 const roundedMap: Record<string, string> = {
   none: "0",
+  xs: "0.1875rem",
   sm: "0.375rem",
   md: "0.75rem",
   lg: "1rem",

@@ -249,6 +249,8 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
   const [draggingRelationIndex, setDraggingRelationIndex] = useState<number | null>(null);
   // Whether a relation is actively being dragged (from tray or edge)
   const [isDraggingRelation, setIsDraggingRelation] = useState(false);
+  // Track which edge drop zone is being hovered
+  const [hoveredEdgeDrop, setHoveredEdgeDrop] = useState<number | null>(null);
 
   // Preload images so they're available instantly for drag badges
   const preloadedImages = useRef<Record<number, HTMLImageElement>>({});
@@ -356,6 +358,7 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
     setDraggingItemIndex(null);
     setDraggingRelationIndex(null);
     setIsDraggingRelation(false);
+    setHoveredEdgeDrop(null);
     // If dragged off an edge and dropped on nothing, remove from that edge
     const sourceEdge = draggingFromEdge.current;
     if (sourceEdge !== null) {
@@ -401,11 +404,15 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
 
   // Drag a relation from the tray
   const createRelationDragBadge = useCallback((item: TrayItem) => {
+    const badgeBg = item.bg ? twColorToHex(item.bg) : (isDark ? "#1e3a5f" : "#dbeafe");
+    const badgeColor = item.color ? twColorToHex(item.color) : (isDark ? "#bfdbfe" : "#1e40af");
+    const badgeRounded = item.rounded ? twRoundedToCss(item.rounded) : twRoundedToCss("xs");
+    const badgeBorder = item.border ? `${Math.max(1, strokeWidth)}px solid ${twColorToHex(item.border)}` : "none";
     const badge = document.createElement("div");
     badge.style.cssText = `
       display: flex; align-items: center; justify-content: center;
-      padding: ${4 * scale}px ${8 * scale}px; border-radius: ${12 * scale}px;
-      background: ${isDark ? "#1e3a5f" : "#dbeafe"}; color: ${isDark ? "#bfdbfe" : "#1e40af"};
+      padding: ${4 * scale}px ${8 * scale}px; border-radius: ${badgeRounded};
+      background: ${badgeBg}; color: ${badgeColor}; border: ${badgeBorder};
       position: fixed; top: -1000px; left: -1000px; white-space: nowrap;
       font-size: ${fontSize * 0.75}rem; font-weight: 500;
     `;
@@ -418,7 +425,7 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
       badge.textContent = item.text || item.value || "";
     }
     return badge;
-  }, [isDark, fontSize, scale, nodeSize]);
+  }, [isDark, fontSize, scale, nodeSize, strokeWidth]);
 
   const handleRelationTrayDragStart = useCallback((e: React.DragEvent, relationIndex: number, item: TrayItem) => {
     e.dataTransfer.setData("application/relation-json", JSON.stringify(relationIndex));
@@ -785,24 +792,29 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
     >
       {relations.map((item, index) => {
         const isPlaced = placedRelationIndices.has(index);
+        const itemBg = item.bg ? twColorToHex(item.bg) : undefined;
+        const itemColor = item.color ? twColorToHex(item.color) : undefined;
+        const itemBorder = item.border ? twColorToHex(item.border) : undefined;
+        const itemRounded = item.rounded ? twRoundedToCss(item.rounded) : twRoundedToCss("xs");
+        const defaultBg = isDark ? "#1e3a5f" : "#dbeafe";
+        const defaultColor = isDark ? "#bfdbfe" : "#1e40af";
+        const placedBg = isDark ? "#3f3f46" : "#e5e7eb";
+        const placedColor = isDark ? "#71717a" : "#9ca3af";
         return (
           <div
             key={index}
             draggable={!isPlaced}
             onDragStart={(e) => handleRelationTrayDragStart(e, index, item)}
-            className={`inline-flex items-center justify-center rounded-full font-medium cursor-grab select-none ${
-              isPlaced
-                ? (isDark
-                    ? "bg-zinc-700 text-zinc-500 cursor-default opacity-50"
-                    : "bg-gray-200 text-gray-400 cursor-default opacity-50")
-                : (isDark
-                    ? "bg-blue-900 text-blue-200"
-                    : "bg-blue-100 text-blue-800")
-            }`}
+            className="inline-flex items-center justify-center font-medium cursor-grab select-none"
             style={{
               padding: `${4 * scale}px ${10 * scale}px`,
               fontSize: `${fontSize * 0.75}rem`,
-              borderRadius: `${12 * scale}px`,
+              borderRadius: itemRounded,
+              background: isPlaced ? placedBg : (itemBg || defaultBg),
+              color: isPlaced ? placedColor : (itemColor || defaultColor),
+              border: itemBorder ? `${Math.max(1, strokeWidth)}px solid ${isPlaced ? (isDark ? "#52525b" : "#d1d5db") : itemBorder}` : "none",
+              opacity: isPlaced ? 0.5 : 1,
+              cursor: isPlaced ? "default" : "grab",
             }}
           >
             {item.image ? (
@@ -1037,13 +1049,9 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                         );
                       }
                       if (!labelText) return null;
-                      let angle = Math.atan2(dy, dx) * (180 / Math.PI);
-                      const flipped = angle > 90 || angle < -90;
-                      if (flipped) angle += 180;
                       const edgeLen = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
                       const arrowMargin = isArrow ? markerSize : 0;
                       const maxWidth = Math.max(0, edgeLen - arrowMargin * 2);
-                      const gap = 6 * scale;
                       const labelFontSize = fontSize * 0.85;
                       const charWidth = labelFontSize * 16 * 0.55;
                       const charsPerLine = Math.max(1, Math.floor(maxWidth / charWidth));
@@ -1063,7 +1071,7 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                       const lineHeight = labelFontSize * 16 * 1.2;
                       const totalHeight = lines.length * lineHeight;
 
-                      let labelColor = edgeLabelColor;
+                      let labelColor = placedRel?.color ? twColorToHex(placedRel.color) : edgeLabelColor;
                       if (placedRel && edge.assess?.method === "value") {
                         if (matchedEdges.has(i)) {
                           labelColor = isDark ? "#4ade80" : "#16a34a";
@@ -1072,23 +1080,58 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                         }
                       }
 
+                      const labelBg = placedRel?.bg ? twColorToHex(placedRel.bg) : null;
+                      const labelBorder = placedRel?.border ? twColorToHex(placedRel.border) : null;
+                      const labelRounded = placedRel?.rounded ? twRoundedToCss(placedRel.rounded) : null;
+
+                      // Compute background pill dimensions
+                      const longestLine = lines.reduce((a, b) => a.length > b.length ? a : b, "");
+                      const textW = longestLine.length * charWidth;
+                      const pad = 6 * scale;
+                      const pillW = textW + pad * 2;
+                      const pillH = totalHeight + pad;
+                      const pillX = midX - pillW / 2;
+                      const pillY = midY - pillH / 2;
+
+                      // Parse border-radius for SVG rx/ry
+                      let pillRx = 4 * scale;
+                      if (labelRounded) {
+                        if (labelRounded.endsWith("px")) pillRx = parseFloat(labelRounded);
+                        else if (labelRounded.endsWith("rem")) pillRx = parseFloat(labelRounded) * 16;
+                        else pillRx = parseFloat(labelRounded) || 4 * scale;
+                      }
+
                       return (
-                        <text
-                          x={midX}
-                          y={midY - gap - totalHeight + lineHeight}
-                          textAnchor="middle"
-                          dominantBaseline="alphabetic"
-                          fill={labelColor}
-                          fontSize={`${labelFontSize}rem`}
-                          transform={`rotate(${angle}, ${midX}, ${midY})`}
-                          style={{ pointerEvents: "none" }}
-                        >
-                          {lines.map((line, li) => (
-                            <tspan key={li} x={midX} dy={li === 0 ? 0 : `${lineHeight}px`}>
-                              {line}
-                            </tspan>
-                          ))}
-                        </text>
+                        <g style={{ pointerEvents: "none" }}>
+                          <rect
+                            x={pillX}
+                            y={pillY}
+                            width={pillW}
+                            height={pillH}
+                            rx={pillRx}
+                            ry={pillRx}
+                            fill={labelBg || (isDark ? "#18181b" : "#ffffff")}
+                            stroke={labelBorder || "none"}
+                            strokeWidth={labelBorder ? strokeWidth : 0}
+                          />
+                          <text
+                            x={midX}
+                            y={midY}
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            fill={labelColor}
+                            fontSize={`${labelFontSize}rem`}
+                          >
+                            {lines.map((line, li) => {
+                              const offsetY = (li - (lines.length - 1) / 2) * lineHeight;
+                              return (
+                                <tspan key={li} x={midX} dy={li === 0 ? offsetY : lineHeight}>
+                                  {line}
+                                </tspan>
+                              );
+                            })}
+                          </text>
+                        </g>
                       );
                     })()}
                   </g>
@@ -1119,8 +1162,14 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
             const displayImage = relation?.image || (hasPlacedRelation ? undefined : edge.image);
             const isEdgeAssessed = edge.assess?.method === "value";
 
+            // Relation styles
+            const relBg = relation?.bg ? twColorToHex(relation.bg) : null;
+            const relBorder = relation?.border ? twColorToHex(relation.border) : null;
+            const relRounded = relation?.rounded ? twRoundedToCss(relation.rounded) : null;
+            const relColor = relation?.color ? twColorToHex(relation.color) : null;
+
             // Assessment coloring when a relation has been placed
-            let bgColor = isDark ? "#3f3f46" : "#e4e4e7";
+            let bgColor = hasPlacedRelation && relBg ? relBg : (isDark ? "#3f3f46" : "#e4e4e7");
             if (hasPlacedRelation && isEdgeAssessed) {
               if (matchedEdges.has(i)) {
                 bgColor = isDark ? "#14532d" : "#dcfce7";
@@ -1128,40 +1177,52 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                 bgColor = isDark ? "#7f1d1d" : "#fee2e2";
               }
             }
+            const dropBorderColor = hasPlacedRelation && relBorder ? relBorder : borderColor;
+            const dropRounded = hasPlacedRelation && relRounded ? relRounded : undefined;
+
+            // Match relation tray badge height: font size + vertical padding
+            const relFontSize = fontSize * 0.75;
+            const relPadV = 4 * scale;
+            const relHeight = relFontSize * 16 + relPadV * 2;
+            const minDropSize = nodeSize * 0.7;
+            const isHovered = hoveredEdgeDrop === i;
 
             // For images: square centered on midpoint, matching SVG image size
             if (displayImage) {
-              const imgSize = nodeSize * 0.4;
+              const imgSize = Math.max(nodeSize * 0.4, minDropSize);
               return (
                 <div
                   key={`edge-drop-${i}`}
                   draggable={hasPlacedRelation}
                   onDragStart={hasPlacedRelation ? (e) => handleEdgeRelationDragStart(e, i) : undefined}
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleEdgeDrop(e, i)}
+                  onDragOver={(e) => { handleDragOver(e); setHoveredEdgeDrop(i); }}
+                  onDragLeave={() => setHoveredEdgeDrop(null)}
+                  onDrop={(e) => { handleEdgeDrop(e, i); setHoveredEdgeDrop(null); }}
                   style={{
                     position: "absolute",
                     left: midX - imgSize / 2,
                     top: midY - imgSize / 2,
                     width: imgSize,
                     height: imgSize,
-                    borderRadius: `${4 * scale}px`,
-                    border: `${strokeWidth}px ${hasPlacedRelation ? "solid" : "dashed"} ${borderColor}`,
+                    borderRadius: dropRounded || `${6 * scale}px`,
+                    border: `${strokeWidth}px ${hasPlacedRelation ? "solid" : "dashed"} ${isHovered ? (isDark ? "#4ade80" : "#22c55e") : dropBorderColor}`,
                     background: bgColor,
+                    boxShadow: isHovered ? `0 0 ${8 * scale}px ${isDark ? "rgba(74,222,128,0.3)" : "rgba(34,197,94,0.25)"}` : "none",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     cursor: hasPlacedRelation ? "grab" : "default",
                     userSelect: "none",
                     zIndex: 5,
+                    transition: "border-color 0.15s, background 0.15s, box-shadow 0.15s",
                   }}
                 >
                   <img
                     src={displayImage}
                     alt={displayLabel}
                     style={{
-                      maxWidth: imgSize * 0.8,
-                      maxHeight: imgSize * 0.8,
+                      maxWidth: imgSize * 0.7,
+                      maxHeight: imgSize * 0.7,
                       objectFit: "cover",
                     }}
                     draggable={false}
@@ -1198,37 +1259,40 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
             // Width: widest line
             const longestLine = lines.reduce((a, b) => a.length > b.length ? a : b, "");
             const textWidth = longestLine.length * charWidth;
-            const pad = 8 * scale;
-            const dropW = textWidth + pad * 2;
-            const dropH = totalHeight + pad;
+            const pad = 12 * scale;
+            const dropW = Math.max(textWidth + pad * 2, minDropSize);
+            const dropH = Math.max(totalHeight + pad, relHeight);
 
             return (
               <div
                 key={`edge-drop-${i}`}
                 draggable={hasPlacedRelation}
                 onDragStart={hasPlacedRelation ? (e) => handleEdgeRelationDragStart(e, i) : undefined}
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleEdgeDrop(e, i)}
+                onDragOver={(e) => { handleDragOver(e); setHoveredEdgeDrop(i); }}
+                onDragLeave={() => setHoveredEdgeDrop(null)}
+                onDrop={(e) => { handleEdgeDrop(e, i); setHoveredEdgeDrop(null); }}
                 style={{
                   position: "absolute",
                   left: midX - dropW / 2,
                   top: midY - dropH / 2,
                   width: dropW,
                   height: dropH,
-                  borderRadius: `${4 * scale}px`,
-                  border: `${strokeWidth}px ${hasPlacedRelation ? "solid" : "dashed"} ${borderColor}`,
+                  borderRadius: dropRounded || `${6 * scale}px`,
+                  border: `${strokeWidth}px ${hasPlacedRelation ? "solid" : "dashed"} ${isHovered ? (isDark ? "#4ade80" : "#22c55e") : dropBorderColor}`,
                   background: bgColor,
+                  boxShadow: isHovered ? `0 0 ${8 * scale}px ${isDark ? "rgba(74,222,128,0.3)" : "rgba(34,197,94,0.25)"}` : "none",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   cursor: hasPlacedRelation ? "grab" : "default",
                   userSelect: "none",
                   zIndex: 5,
+                  transition: "border-color 0.15s, background 0.15s, box-shadow 0.15s",
                 }}
               >
                 <span
                   style={{
-                    color: nodeTextColor,
+                    color: relColor || nodeTextColor,
                     fontSize: `${labelFontSize}rem`,
                     textAlign: "center",
                     lineHeight: 1.2,

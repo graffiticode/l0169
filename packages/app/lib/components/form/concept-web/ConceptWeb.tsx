@@ -474,33 +474,6 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
     const badgeColor = item.color ? twColorToHex(item.color) : (isDark ? "#bfdbfe" : "#1e40af");
     const badgeRounded = item.rounded ? twRoundedToCss(item.rounded) : twRoundedToCss("md");
     const badgeBorder = item.border ? `${Math.max(1, strokeWidth)}px solid ${twColorToHex(item.border)}` : "none";
-    const preloaded = preloadedImages.current[itemIndex];
-    if (item.image && preloaded && preloaded.complete) {
-      // Use canvas for images — renders synchronously for drag snapshot
-      const dpr = window.devicePixelRatio || 1;
-      const canvas = document.createElement("canvas");
-      canvas.width = sz * dpr;
-      canvas.height = sz * dpr;
-      canvas.style.cssText = `width: ${sz}px; height: ${sz}px; position: fixed; top: -1000px; left: -1000px;`;
-      const ctx = canvas.getContext("2d")!;
-      ctx.scale(dpr, dpr);
-      // Draw background
-      ctx.beginPath();
-      ctx.arc(sz / 2, sz / 2, sz / 2, 0, Math.PI * 2);
-      ctx.fillStyle = badgeBg;
-      ctx.fill();
-      // Clip and draw image centered
-      ctx.save();
-      const imgSz = sz * 0.75;
-      const offset = (sz - imgSz) / 2;
-      ctx.beginPath();
-      ctx.arc(sz / 2, sz / 2, imgSz / 2, 0, Math.PI * 2);
-      ctx.clip();
-      ctx.drawImage(preloaded, offset, offset, imgSz, imgSz);
-      ctx.restore();
-      return canvas;
-    }
-    // Fallback: text badge
     const badge = document.createElement("div");
     badge.style.cssText = `
       display: flex; align-items: center; justify-content: center;
@@ -509,14 +482,28 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
       background: ${badgeBg}; color: ${badgeColor}; border: ${badgeBorder};
       position: fixed; top: -1000px; left: -1000px; overflow: hidden;
     `;
-    const span = document.createElement("span");
-    span.textContent = item.text || item.value || "";
-    span.style.cssText = `
-      font-size: ${fontSize}rem; font-weight: 500; text-align: center;
-      line-height: 1.2; overflow: hidden; overflow-wrap: break-word;
-      max-width: ${sz * 0.7}px;
-    `;
-    badge.appendChild(span);
+    if (item.image) {
+      const img = document.createElement("img");
+      img.src = item.image;
+      const preloaded = preloadedImages.current[itemIndex];
+      if (preloaded && preloaded.complete) {
+        img.src = preloaded.src;
+      }
+      img.style.cssText = `
+        width: ${sz * 0.75}px; height: ${sz * 0.75}px;
+        border-radius: ${badgeRounded}; object-fit: cover;
+      `;
+      badge.appendChild(img);
+    } else {
+      const span = document.createElement("span");
+      span.textContent = item.text || item.value || "";
+      span.style.cssText = `
+        font-size: ${fontSize}rem; font-weight: 500; text-align: center;
+        line-height: 1.2; overflow: hidden; overflow-wrap: break-word;
+        max-width: ${sz * 0.7}px;
+      `;
+      badge.appendChild(span);
+    }
     return badge;
   }, [isDark, fontSize, scale, strokeWidth]);
 

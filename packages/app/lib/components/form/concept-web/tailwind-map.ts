@@ -43,9 +43,9 @@ const roundedMap: Record<string, string> = {
   sm: "0.375rem",
   md: "0.75rem",
   lg: "1rem",
-  xl: "1.5rem",
-  "2xl": "2rem",
-  "3xl": "3rem",
+  xl: "1.25rem",
+  "2xl": "1.75rem",
+  "3xl": "2.5rem",
   full: "9999px",
 };
 

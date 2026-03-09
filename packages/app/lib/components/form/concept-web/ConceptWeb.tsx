@@ -931,19 +931,68 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                 const fromH = fromData?.h ? twSpacingToPx(fromData.h) * scale : nodeSize;
                 const toW = toData?.w ? twSpacingToPx(toData.w) * scale : nodeSize;
                 const toH = toData?.h ? twSpacingToPx(toData.h) * scale : nodeSize;
+                const fromRoundedCss = fromData?.rounded ? twRoundedToCss(fromData.rounded) : twRoundedToCss("md");
+                const toRoundedCss = toData?.rounded ? twRoundedToCss(toData.rounded) : twRoundedToCss("md");
 
-                // Rectangle-edge intersection offset
-                const rectOffset = (hw: number, hh: number, dirX: number, dirY: number) => {
+                // Rounded-rectangle edge intersection: find distance from center
+                // to the boundary along direction (dirX, dirY)
+                const roundedRectOffset = (hw: number, hh: number, dirX: number, dirY: number, radiusCss: string) => {
                   const absDx = Math.abs(dirX);
                   const absDy = Math.abs(dirY);
                   if (absDx < 1e-9 && absDy < 1e-9) return 0;
-                  const tx = absDx > 1e-9 ? hw / absDx : Infinity;
-                  const ty = absDy > 1e-9 ? hh / absDy : Infinity;
-                  return Math.min(tx, ty);
+
+                  // Parse border-radius to pixels; "9999px" or large values → ellipse
+                  let r: number;
+                  if (radiusCss.endsWith("px")) {
+                    r = parseFloat(radiusCss);
+                  } else if (radiusCss.endsWith("rem")) {
+                    r = parseFloat(radiusCss) * 16;
+                  } else {
+                    r = parseFloat(radiusCss) || 0;
+                  }
+                  // Clamp radius to half the smaller dimension (like CSS does)
+                  const maxR = Math.min(hw, hh);
+                  r = Math.min(r, maxR);
+
+                  if (r >= maxR - 0.5) {
+                    // Fully rounded → ellipse intersection
+                    // Ellipse: (x/hw)^2 + (y/hh)^2 = 1
+                    // Point along (dirX, dirY): t such that (t*dirX/hw)^2 + (t*dirY/hh)^2 = 1
+                    const denom = (absDx / hw) ** 2 + (absDy / hh) ** 2;
+                    return 1 / Math.sqrt(denom);
+                  }
+
+                  // Rounded rectangle: straight edges with circular arc corners
+                  // The straight region extends from -hw to hw with corners rounded by r
+                  // Find intersection of ray with the rounded rect boundary
+                  const rectT = Math.min(
+                    absDx > 1e-9 ? hw / absDx : Infinity,
+                    absDy > 1e-9 ? hh / absDy : Infinity,
+                  );
+                  // Point on the rectangle boundary
+                  const px = absDx * rectT;
+                  const py = absDy * rectT;
+                  // Check if point is in the corner region
+                  const cornerX = hw - r;
+                  const cornerY = hh - r;
+                  if (px > cornerX && py > cornerY) {
+                    // In corner region — intersect ray with the corner circle
+                    // Circle center at (cornerX, cornerY) with radius r
+                    // Ray: (t*absDx, t*absDy)
+                    // (t*absDx - cornerX)^2 + (t*absDy - cornerY)^2 = r^2
+                    const a = absDx * absDx + absDy * absDy;
+                    const b = -2 * (absDx * cornerX + absDy * cornerY);
+                    const c = cornerX * cornerX + cornerY * cornerY - r * r;
+                    const disc = b * b - 4 * a * c;
+                    if (disc >= 0) {
+                      return (-b + Math.sqrt(disc)) / (2 * a);
+                    }
+                  }
+                  return rectT;
                 };
 
-                const fromOffset = rectOffset(fromW / 2, fromH / 2, nx, ny);
-                const toOffset = rectOffset(toW / 2, toH / 2, nx, ny);
+                const fromOffset = roundedRectOffset(fromW / 2, fromH / 2, nx, ny, fromRoundedCss);
+                const toOffset = roundedRectOffset(toW / 2, toH / 2, nx, ny, toRoundedCss);
 
                 const x1 = from.x + nx * fromOffset;
                 const y1 = from.y + ny * fromOffset;

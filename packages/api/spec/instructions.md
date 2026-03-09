@@ -32,6 +32,14 @@ L0169 is a Graffiticode dialect for authoring interactive concept web assessment
 - When using relations, add `assess` to edges with `method 'value'` and `expected` set to the correct relation value
 - Relations use `value` for scoring; `text` or `image` override the display, same pattern as `concept`
 - Add descriptive comments using the pipe symbol `|`
+- Use `w` and `h` to set node size in Tailwind spacing units (1 unit = 4px): `w 24` = 96px wide
+- Use `rounded` to set border radius: `"none"`, `"sm"`, `"md"` (default), `"lg"`, `"xl"`, `"2xl"`, `"3xl"`, `"full"` (circle)
+- Use `bg` to set background color with a Tailwind color name: `bg 'blue-500'`
+- Use `color` to set text color: `color 'white'`
+- Use `border` to set border color: `border 'zinc-400'`
+- Style keywords can be applied to anchor, connections, concepts, edges, and relations
+- When style keywords are used on a list container (e.g. `connections`), they set defaults for all children; per-item overrides win
+- Default node shape is a rounded rectangle; use `rounded 'full'` for circles
 
 ## Example Patterns
 

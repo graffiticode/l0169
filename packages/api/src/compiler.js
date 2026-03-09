@@ -188,6 +188,54 @@ export class Checker extends BasisChecker {
       });
     });
   }
+
+  W(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        resume([], node);
+      });
+    });
+  }
+
+  H(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        resume([], node);
+      });
+    });
+  }
+
+  ROUNDED(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        resume([], node);
+      });
+    });
+  }
+
+  BG(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        resume([], node);
+      });
+    });
+  }
+
+  COLOR(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        resume([], node);
+      });
+    });
+  }
+
+  BORDER(node, options, resume) {
+    this.visit(node.elts[0], options, async (e0, v0) => {
+      this.visit(node.elts[1], options, async (e1, v1) => {
+        resume([], node);
+      });
+    });
+  }
 }
 
 export class Transformer extends BasisTransformer {
@@ -227,7 +275,17 @@ export class Transformer extends BasisTransformer {
   CONNECTIONS(node, options, resume) {
     this.visit(node.elts[0], options, (e0, v0) => {
       this.visit(node.elts[1], options, (e1, v1) => {
-        resume([], { ...v1, connections: v0 });
+        const { w, h, rounded, bg, color, border, ...rest } = v1;
+        const shared = {
+          ...(w !== undefined && { w }),
+          ...(h !== undefined && { h }),
+          ...(rounded !== undefined && { rounded }),
+          ...(bg !== undefined && { bg }),
+          ...(color !== undefined && { color }),
+          ...(border !== undefined && { border }),
+        };
+        const connections = v0.map(conn => ({ ...shared, ...conn }));
+        resume([], { ...rest, connections });
       });
     });
   }
@@ -295,7 +353,17 @@ export class Transformer extends BasisTransformer {
   CONCEPTS(node, options, resume) {
     this.visit(node.elts[0], options, (e0, v0) => {
       this.visit(node.elts[1], options, (e1, v1) => {
-        resume([], { ...v1, concepts: v0 });
+        const { w, h, rounded, bg, color, border, ...rest } = v1;
+        const shared = {
+          ...(w !== undefined && { w }),
+          ...(h !== undefined && { h }),
+          ...(rounded !== undefined && { rounded }),
+          ...(bg !== undefined && { bg }),
+          ...(color !== undefined && { color }),
+          ...(border !== undefined && { border }),
+        };
+        const concepts = v0.map(item => ({ ...shared, ...item }));
+        resume([], { ...rest, concepts });
       });
     });
   }
@@ -328,7 +396,17 @@ export class Transformer extends BasisTransformer {
   EDGES(node, options, resume) {
     this.visit(node.elts[0], options, (e0, v0) => {
       this.visit(node.elts[1], options, (e1, v1) => {
-        resume([], { ...v1, edges: v0 });
+        const { w, h, rounded, bg, color, border, ...rest } = v1;
+        const shared = {
+          ...(w !== undefined && { w }),
+          ...(h !== undefined && { h }),
+          ...(rounded !== undefined && { rounded }),
+          ...(bg !== undefined && { bg }),
+          ...(color !== undefined && { color }),
+          ...(border !== undefined && { border }),
+        };
+        const edges = v0.map(item => ({ ...shared, ...item }));
+        resume([], { ...rest, edges });
       });
     });
   }
@@ -342,8 +420,17 @@ export class Transformer extends BasisTransformer {
   RELATIONS(node, options, resume) {
     this.visit(node.elts[0], options, (e0, v0) => {
       this.visit(node.elts[1], options, (e1, v1) => {
-        const { align: relationsAlign, ...rest } = v1;
-        resume([], { ...rest, relations: v0, ...(relationsAlign && { relationsAlign }) });
+        const { align: relationsAlign, w, h, rounded, bg, color, border, ...rest } = v1;
+        const shared = {
+          ...(w !== undefined && { w }),
+          ...(h !== undefined && { h }),
+          ...(rounded !== undefined && { rounded }),
+          ...(bg !== undefined && { bg }),
+          ...(color !== undefined && { color }),
+          ...(border !== undefined && { border }),
+        };
+        const relations = v0.map(item => ({ ...shared, ...item }));
+        resume([], { ...rest, relations, ...(relationsAlign && { relationsAlign }) });
       });
     });
   }
@@ -377,6 +464,54 @@ export class Transformer extends BasisTransformer {
     this.visit(node.elts[0], options, (e0, v0) => {
       this.visit(node.elts[1], options, (e1, v1) => {
         resume([], { ...v1, type: v0?.tag?.toLowerCase() || v0 });
+      });
+    });
+  }
+
+  W(node, options, resume) {
+    this.visit(node.elts[0], options, (e0, v0) => {
+      this.visit(node.elts[1], options, (e1, v1) => {
+        resume([], { ...v1, w: v0 });
+      });
+    });
+  }
+
+  H(node, options, resume) {
+    this.visit(node.elts[0], options, (e0, v0) => {
+      this.visit(node.elts[1], options, (e1, v1) => {
+        resume([], { ...v1, h: v0 });
+      });
+    });
+  }
+
+  ROUNDED(node, options, resume) {
+    this.visit(node.elts[0], options, (e0, v0) => {
+      this.visit(node.elts[1], options, (e1, v1) => {
+        resume([], { ...v1, rounded: v0 });
+      });
+    });
+  }
+
+  BG(node, options, resume) {
+    this.visit(node.elts[0], options, (e0, v0) => {
+      this.visit(node.elts[1], options, (e1, v1) => {
+        resume([], { ...v1, bg: v0 });
+      });
+    });
+  }
+
+  COLOR(node, options, resume) {
+    this.visit(node.elts[0], options, (e0, v0) => {
+      this.visit(node.elts[1], options, (e1, v1) => {
+        resume([], { ...v1, color: v0 });
+      });
+    });
+  }
+
+  BORDER(node, options, resume) {
+    this.visit(node.elts[0], options, (e0, v0) => {
+      this.visit(node.elts[1], options, (e1, v1) => {
+        resume([], { ...v1, border: v0 });
       });
     });
   }

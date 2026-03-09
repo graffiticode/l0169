@@ -34,6 +34,12 @@ semantics and base library can be found here:
 | `type` | `<string record: record>` | Sets the edge type |
 | `relations` | `<list record: record>` | Defines a list of relation labels for drag-and-drop onto edges |
 | `relation` | `<record: record>` | Defines a single relation label (arity 1) |
+| `w` | `<number record: record>` | Sets node width in Tailwind spacing units (1 unit = 4px) |
+| `h` | `<number record: record>` | Sets node height in Tailwind spacing units (1 unit = 4px) |
+| `rounded` | `<string record: record>` | Sets border radius preset (e.g. `"lg"`, `"full"`, `"none"`) |
+| `bg` | `<string record: record>` | Sets background Tailwind color name (e.g. `"blue-500"`) |
+| `color` | `<string record: record>` | Sets text Tailwind color name (e.g. `"white"`) |
+| `border` | `<string record: record>` | Sets border Tailwind color name (e.g. `"zinc-400"`) |
 
 ### topic
 
@@ -259,6 +265,61 @@ and `image` are passed through the pipeline. The `value` is used for scoring;
 relation value 'causes' {}
 relation value 'inhibits' text 'Inhibits →' {}
 relation value 'enables' image 'https://...' {}
+```
+
+### w
+
+Sets the width of a node in Tailwind spacing units (1 unit = 4px). Can be applied
+to anchor, connections, concepts, edges, and relations. When used on a list container
+(e.g. `connections`), it sets the default width for all children.
+
+```
+w 24
+```
+
+### h
+
+Sets the height of a node in Tailwind spacing units (1 unit = 4px).
+
+```
+h 12
+```
+
+### rounded
+
+Sets the border radius preset. Accepted values: `"none"`, `"sm"`, `"md"` (default),
+`"lg"`, `"xl"`, `"2xl"`, `"3xl"`, `"full"` (circle).
+
+```
+rounded 'lg'
+rounded 'full'
+```
+
+### bg
+
+Sets the background color using a Tailwind color name.
+
+```
+bg 'blue-500'
+bg 'indigo-100'
+```
+
+### color
+
+Sets the text color using a Tailwind color name.
+
+```
+color 'white'
+color 'zinc-800'
+```
+
+### border
+
+Sets the border color using a Tailwind color name.
+
+```
+border 'zinc-400'
+border 'blue-600'
 ```
 
 ### theme

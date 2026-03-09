@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
+import { twColorToHex, twSpacingToPx, twRoundedToCss } from "./tailwind-map";
 
 interface AssessConfig {
   method: string;
@@ -12,6 +13,12 @@ interface ConceptConnection {
   text: string;
   image?: string;
   assess?: AssessConfig;
+  w?: number;
+  h?: number;
+  rounded?: string;
+  bg?: string;
+  color?: string;
+  border?: string;
 }
 
 interface ConceptEdge {
@@ -21,12 +28,24 @@ interface ConceptEdge {
   text?: string;
   image?: string;
   assess?: AssessConfig;
+  w?: number;
+  h?: number;
+  rounded?: string;
+  bg?: string;
+  color?: string;
+  border?: string;
 }
 
 interface TrayItem {
   value?: string;
   text?: string;
   image?: string;
+  w?: number;
+  h?: number;
+  rounded?: string;
+  bg?: string;
+  color?: string;
+  border?: string;
 }
 
 interface ConceptWebData {
@@ -65,6 +84,7 @@ function computePositions(
   height: number,
   nodeSize: number,
   padding: number,
+  scale: number,
 ): Record<string, NodePosition> {
   const positions: Record<string, NodePosition> = {};
 
@@ -76,9 +96,18 @@ function computePositions(
     positions["anchor"] = { x: cx, y: cy };
   }
 
+  // Compute max node dimension across all nodes for orbit radius
+  let maxDim = nodeSize;
+  const allNodes = [...connections, ...(anchor ? [anchor] : [])];
+  for (const n of allNodes) {
+    const nw = n.w ? twSpacingToPx(n.w) * scale : nodeSize;
+    const nh = n.h ? twSpacingToPx(n.h) * scale : nodeSize;
+    maxDim = Math.max(maxDim, nw, nh);
+  }
+
   // Arrange connections radially
   if (connections.length > 0) {
-    const radius = Math.min(cx - nodeSize / 2 - padding, cy - nodeSize / 2 - padding);
+    const radius = Math.min(cx - maxDim / 2 - padding, cy - maxDim / 2 - padding);
     connections.forEach((_, i) => {
       const angle = (2 * Math.PI * i) / connections.length - Math.PI / 2;
       positions[String(i)] = {
@@ -258,7 +287,7 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
       const ns = BASE_NODE_SIZE * s;
       const pd = BASE_PADDING * s;
       setSize({ width, height });
-      setPositions(computePositions(anchor, connections, width, height, ns, pd));
+      setPositions(computePositions(anchor, connections, width, height, ns, pd, s));
     });
     observer.observe(containerRef.current);
     return () => observer.disconnect();
@@ -895,13 +924,31 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                 const nx = dx / dist;
                 const ny = dy / dist;
 
-                // Circle radius
-                const r = nodeSize / 2;
+                // Per-node dimensions for edge offset
+                const fromData = edge.fromKey === "anchor" ? anchor : connections[parseInt(edge.fromKey)];
+                const toData = edge.toKey === "anchor" ? anchor : connections[parseInt(edge.toKey)];
+                const fromW = fromData?.w ? twSpacingToPx(fromData.w) * scale : nodeSize;
+                const fromH = fromData?.h ? twSpacingToPx(fromData.h) * scale : nodeSize;
+                const toW = toData?.w ? twSpacingToPx(toData.w) * scale : nodeSize;
+                const toH = toData?.h ? twSpacingToPx(toData.h) * scale : nodeSize;
 
-                const x1 = from.x + nx * r;
-                const y1 = from.y + ny * r;
-                const x2 = to.x - nx * r;
-                const y2 = to.y - ny * r;
+                // Rectangle-edge intersection offset
+                const rectOffset = (hw: number, hh: number, dirX: number, dirY: number) => {
+                  const absDx = Math.abs(dirX);
+                  const absDy = Math.abs(dirY);
+                  if (absDx < 1e-9 && absDy < 1e-9) return 0;
+                  const tx = absDx > 1e-9 ? hw / absDx : Infinity;
+                  const ty = absDy > 1e-9 ? hh / absDy : Infinity;
+                  return Math.min(tx, ty);
+                };
+
+                const fromOffset = rectOffset(fromW / 2, fromH / 2, nx, ny);
+                const toOffset = rectOffset(toW / 2, toH / 2, nx, ny);
+
+                const x1 = from.x + nx * fromOffset;
+                const y1 = from.y + ny * fromOffset;
+                const x2 = to.x - nx * toOffset;
+                const y2 = to.y - ny * toOffset;
 
                 const isDashed = edge.type === "dashed" || edge.type === "dashed-arrow";
                 const isArrow = edge.type === "solid-arrow" || edge.type === "dashed-arrow";
@@ -1185,12 +1232,22 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
             const pos = positions[key];
             if (!pos) return null;
 
-            const bg = getEntryBackground(key, data);
+            const assessBg = getEntryBackground(key, data);
             const displayText = getDisplayText(key, data);
             const displayImage = getDisplayImage(key, data);
             const hasPlacedItem = hasItems && placedItems[key] !== undefined;
             // Only allow repositioning if the node is empty (no placed item)
             const canReposition = !hasItems || !hasPlacedItem;
+
+            // Per-node styling
+            const nw = data.w ? twSpacingToPx(data.w) * scale : nodeSize;
+            const nh = data.h ? twSpacingToPx(data.h) * scale : nodeSize;
+            const nodeRounded = data.rounded ? twRoundedToCss(data.rounded) : twRoundedToCss("md");
+            const nodeBg = data.bg ? twColorToHex(data.bg) : nodeBackground;
+            const nodeColor = data.color ? twColorToHex(data.color) : nodeTextColor;
+            const nodeBorder = data.border ? twColorToHex(data.border) : borderColor;
+            // Assessment colors override custom bg when active
+            const bg = assessBg !== nodeBackground ? assessBg : nodeBg;
 
             return (
               <div
@@ -1202,12 +1259,12 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                 onDrop={hasItems ? (e) => handleDrop(e, key) : undefined}
                 style={{
                   position: "absolute",
-                  left: pos.x - nodeSize / 2,
-                  top: pos.y - nodeSize / 2,
-                  width: nodeSize,
-                  height: nodeSize,
-                  borderRadius: "50%",
-                  border: `${strokeWidth}px solid ${borderColor}`,
+                  left: pos.x - nw / 2,
+                  top: pos.y - nh / 2,
+                  width: nw,
+                  height: nh,
+                  borderRadius: nodeRounded,
+                  border: `${strokeWidth}px solid ${nodeBorder}`,
                   background: bg,
                   display: "flex",
                   alignItems: "center",
@@ -1223,9 +1280,9 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                     src={displayImage}
                     alt={displayText}
                     style={{
-                      maxWidth: nodeSize * 0.7,
-                      maxHeight: nodeSize * 0.7,
-                      borderRadius: "50%",
+                      maxWidth: nw * 0.7,
+                      maxHeight: nh * 0.7,
+                      borderRadius: nodeRounded,
                       objectFit: "cover",
                     }}
                     draggable={false}
@@ -1233,7 +1290,7 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                 ) : (
                   <span
                     style={{
-                      color: nodeTextColor,
+                      color: nodeColor,
                       fontSize: `${fontSize}rem`,
                       textAlign: "center",
                       lineHeight: 1.2,

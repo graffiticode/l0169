@@ -152,5 +152,47 @@ export const lexicon = {
     "cls": "function",
     "length": 1,
     "arity": 1
+  },
+  "w" : {
+    "tk": 1,
+    "name": "W",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
+  "h" : {
+    "tk": 1,
+    "name": "H",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
+  "rounded" : {
+    "tk": 1,
+    "name": "ROUNDED",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
+  "bg" : {
+    "tk": 1,
+    "name": "BG",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
+  "color" : {
+    "tk": 1,
+    "name": "COLOR",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
+  "border" : {
+    "tk": 1,
+    "name": "BORDER",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
   }
 }

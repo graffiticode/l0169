@@ -150,34 +150,11 @@
 111. Create a fully featured concept web with topic, markdown instructions, dark theme, custom edges with mixed types and text labels, assessed anchor and connections, and a bottom-aligned concepts tray with image concepts and text distractors.
 112. Create a drag-and-drop concept web with topic, instructions, light theme, solid-arrow edges from anchor to all connections, dashed peer-to-peer edges with labels, blank assessed nodes, and a right-aligned concepts tray with matching concepts.
 
-## Category 13: Edge Assessment (113–116) *
-
-113. Create a concept web with custom edges where one edge has assessment expecting a specific value. *
-114. Create a concept web with custom edges where every edge is assessed with different expected values. *
-115. Create a concept web with custom edges where some edges are assessed and others are display-only. *
-116. Create a concept web with assessed edges and assessed nodes on the same diagram. *
-
-## Category 14: Relations — Basics (117–124) *
-
-117. Create a concept web with a relations tray containing two relation labels. *
-118. Create a concept web with a relation that has a value for scoring. *
-119. Create a concept web with a relation that uses text to override the display independently of its value. *
-120. Create a concept web with a relation that uses an image for display. *
-121. Create a concept web with a relations tray containing a mix of text and image relations. *
-122. Create a concept web with a relations tray aligned to the bottom. *
-123. Create a concept web with a relations tray aligned to the left. *
-124. Create a concept web with a relations tray aligned to the top. *
-
-## Category 15: Relations — Drag-and-Drop (125–130) *
-
-125. Create a drag-and-drop concept web where students drag relation labels from the tray onto assessed edges. *
-126. Create a drag-and-drop concept web with three assessed edges and three matching relation labels in the tray. *
-127. Create a drag-and-drop concept web with a relations tray containing more relations than edges as distractors. *
-128. Create a drag-and-drop concept web with relation labels where values differ from their display text. *
-129. Create a drag-and-drop concept web with image-based relation labels dragged onto assessed edges. *
-130. Create a drag-and-drop concept web with both a concepts tray for nodes and a relations tray for edges. *
-
-## Category 16: Relations + Full Feature Compositions (131–132) *
-
-131. Create a drag-and-drop concept web with a concepts tray aligned right and a relations tray aligned bottom, with assessment on both nodes and edges. *
-132. Create a fully featured drag-and-drop concept web with topic, markdown instructions, dark theme, blank assessed nodes with a concepts tray, assessed edges with mixed types, a relations tray with text overrides and distractors, concepts aligned right, and relations aligned bottom. *
+## Category 13: Edge Assessment (113–116)
+113. Create a concept web with custom edges where one edge has assessment expecting a specific value.114. Create a concept web with custom edges where every edge is assessed with different expected values.115. Create a concept web with custom edges where some edges are assessed and others are display-only.116. Create a concept web with assessed edges and assessed nodes on the same diagram.
+## Category 14: Relations — Basics (117–124)
+117. Create a concept web with a relations tray containing two relation labels.118. Create a concept web with a relation that has a value for scoring.119. Create a concept web with a relation that uses text to override the display independently of its value.120. Create a concept web with a relation that uses an image for display.121. Create a concept web with a relations tray containing a mix of text and image relations.122. Create a concept web with a relations tray aligned to the bottom.123. Create a concept web with a relations tray aligned to the left.124. Create a concept web with a relations tray aligned to the top.
+## Category 15: Relations — Drag-and-Drop (125–130)
+125. Create a drag-and-drop concept web where students drag relation labels from the tray onto assessed edges.126. Create a drag-and-drop concept web with three assessed edges and three matching relation labels in the tray.127. Create a drag-and-drop concept web with a relations tray containing more relations than edges as distractors.128. Create a drag-and-drop concept web with relation labels where values differ from their display text.129. Create a drag-and-drop concept web with image-based relation labels dragged onto assessed edges.130. Create a drag-and-drop concept web with both a concepts tray for nodes and a relations tray for edges.
+## Category 16: Relations + Full Feature Compositions (131–132)
+131. Create a drag-and-drop concept web with a concepts tray aligned right and a relations tray aligned bottom, with assessment on both nodes and edges.132. Create a fully featured drag-and-drop concept web with topic, markdown instructions, dark theme, blank assessed nodes with a concepts tray, assessed edges with mixed types, a relations tray with text overrides and distractors, concepts aligned right, and relations aligned bottom.

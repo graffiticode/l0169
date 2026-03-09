@@ -470,6 +470,10 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
   }, []);
 
   const createDragBadge = useCallback((item: TrayItem, itemIndex: number, sz: number) => {
+    const badgeBg = item.bg ? twColorToHex(item.bg) : (isDark ? "#1e3a5f" : "#dbeafe");
+    const badgeColor = item.color ? twColorToHex(item.color) : (isDark ? "#bfdbfe" : "#1e40af");
+    const badgeRounded = item.rounded ? twRoundedToCss(item.rounded) : twRoundedToCss("md");
+    const badgeBorder = item.border ? `${Math.max(1, strokeWidth)}px solid ${twColorToHex(item.border)}` : "none";
     const preloaded = preloadedImages.current[itemIndex];
     if (item.image && preloaded && preloaded.complete) {
       // Use canvas for images — renders synchronously for drag snapshot
@@ -480,11 +484,10 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
       canvas.style.cssText = `width: ${sz}px; height: ${sz}px; position: fixed; top: -1000px; left: -1000px;`;
       const ctx = canvas.getContext("2d")!;
       ctx.scale(dpr, dpr);
-      // Draw circular background
-      const bg = isDark ? "#1e3a5f" : "#dbeafe";
+      // Draw background
       ctx.beginPath();
       ctx.arc(sz / 2, sz / 2, sz / 2, 0, Math.PI * 2);
-      ctx.fillStyle = bg;
+      ctx.fillStyle = badgeBg;
       ctx.fill();
       // Clip and draw image centered
       ctx.save();
@@ -501,9 +504,9 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
     const badge = document.createElement("div");
     badge.style.cssText = `
       display: flex; align-items: center; justify-content: center;
-      width: ${sz}px; height: ${sz}px; border-radius: 50%; box-sizing: border-box;
+      width: ${sz}px; height: ${sz}px; border-radius: ${badgeRounded}; box-sizing: border-box;
       padding: ${4 * scale}px;
-      background: ${isDark ? "#1e3a5f" : "#dbeafe"}; color: ${isDark ? "#bfdbfe" : "#1e40af"};
+      background: ${badgeBg}; color: ${badgeColor}; border: ${badgeBorder};
       position: fixed; top: -1000px; left: -1000px; overflow: hidden;
     `;
     const span = document.createElement("span");
@@ -515,7 +518,7 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
     `;
     badge.appendChild(span);
     return badge;
-  }, [isDark, fontSize, scale]);
+  }, [isDark, fontSize, scale, strokeWidth]);
 
   const handleTrayDragStart = useCallback((e: React.DragEvent, itemIndex: number, item: TrayItem) => {
     e.dataTransfer.setData("application/json", JSON.stringify(itemIndex));
@@ -725,25 +728,31 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
     >
       {items.map((item, index) => {
         const isPlaced = placedItemIndices.has(index);
+        const itemBg = item.bg ? twColorToHex(item.bg) : undefined;
+        const itemColor = item.color ? twColorToHex(item.color) : undefined;
+        const itemBorder = item.border ? twColorToHex(item.border) : undefined;
+        const itemRounded = item.rounded ? twRoundedToCss(item.rounded) : twRoundedToCss("md");
+        const defaultBg = isDark ? "#1e3a5f" : "#dbeafe";
+        const defaultColor = isDark ? "#bfdbfe" : "#1e40af";
+        const placedBg = isDark ? "#3f3f46" : "#e5e7eb";
+        const placedColor = isDark ? "#71717a" : "#9ca3af";
         return (
           <div
             key={index}
             draggable={!isPlaced}
             onDragStart={(e) => handleTrayDragStart(e, index, item)}
-            className={`inline-flex items-center justify-center rounded-full font-medium cursor-grab select-none ${
-              isPlaced
-                ? (isDark
-                    ? "bg-zinc-700 text-zinc-500 cursor-default opacity-50"
-                    : "bg-gray-200 text-gray-400 cursor-default opacity-50")
-                : (isDark
-                    ? "bg-blue-900 text-blue-200"
-                    : "bg-blue-100 text-blue-800")
-            }`}
+            className="inline-flex items-center justify-center font-medium cursor-grab select-none"
             style={{
               width: nodeSize * 0.75,
               height: nodeSize * 0.75,
               fontSize: `${fontSize * 0.75}rem`,
               padding: `${3 * scale}px`,
+              borderRadius: itemRounded,
+              background: isPlaced ? placedBg : (itemBg || defaultBg),
+              color: isPlaced ? placedColor : (itemColor || defaultColor),
+              border: itemBorder ? `${Math.max(1, strokeWidth)}px solid ${isPlaced ? (isDark ? "#52525b" : "#d1d5db") : itemBorder}` : "none",
+              opacity: isPlaced ? 0.5 : 1,
+              cursor: isPlaced ? "default" : "grab",
             }}
           >
             {item.image ? (
@@ -753,7 +762,7 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                 style={{
                   width: nodeSize * 0.75 * 0.75,
                   height: nodeSize * 0.75 * 0.75,
-                  borderRadius: "50%",
+                  borderRadius: itemRounded,
                   objectFit: "cover",
                 }}
                 draggable={false}
@@ -762,7 +771,6 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
             {!item.image && (item.text || item.value) && (
               <span
                 style={{
-                  color: isDark ? "#bfdbfe" : "#1e40af",
                   fontSize: `${fontSize * 0.75}rem`,
                   textAlign: "center",
                   lineHeight: 1.2,

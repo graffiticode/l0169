@@ -396,8 +396,9 @@ export class Transformer extends BasisTransformer {
   EDGES(node, options, resume) {
     this.visit(node.elts[0], options, (e0, v0) => {
       this.visit(node.elts[1], options, (e1, v1) => {
-        const { w, h, rounded, bg, color, border, ...rest } = v1;
+        const { type, w, h, rounded, bg, color, border, ...rest } = v1;
         const shared = {
+          ...(type !== undefined && { type }),
           ...(w !== undefined && { w }),
           ...(h !== undefined && { h }),
           ...(rounded !== undefined && { rounded }),

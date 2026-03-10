@@ -80,13 +80,15 @@ anchor text 'Hub' {}
 
 Defines a list of peripheral connection nodes arranged radially around the anchor.
 Style keywords (`w`, `h`, `rounded`, `bg`, `color`, `border`) on the continuation
-set defaults for all children; per-connection overrides win.
+set defaults for all children; per-connection overrides win. Do not add `{}` after
+the closing `]` unless `connections` is at the end of the program; style keywords
+or the next function in the program provide the continuation value.
 
 ```
 connections [
   connection text 'Foo' {},
   connection text 'Bar' {}
-] {}
+]
 ```
 
 With shared styles:
@@ -157,7 +159,9 @@ expected 'Hub'
 
 Defines a list of tray concepts that students can drag onto concept web nodes.
 Concepts render as badges in a tray alongside the diagram. Style keywords on the
-continuation set defaults for all children.
+continuation set defaults for all children. Do not add `{}` after the closing `]`
+unless `concepts` is at the end of the program; style keywords or the next function
+in the program provide the continuation value.
 
 ```
 concepts [
@@ -260,7 +264,9 @@ type 'dashed-arrow'
 Defines a list of relation labels that students can drag onto edges. Relations
 render as badges in a tray alongside the diagram, similar to `concepts` but for
 edges. Use `align` to position the relations tray. Style keywords on the
-continuation set defaults for all children.
+continuation set defaults for all children. Do not add `{}` after the closing `]`
+unless `relations` is at the end of the program; style keywords or the next function
+in the program provide the continuation value.
 
 ```
 relations [

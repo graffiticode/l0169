@@ -38,7 +38,7 @@ L0169 is a Graffiticode dialect for authoring interactive concept web assessment
 - Use `color` to set text color: `color 'white'`
 - Use `border` to set border color: `border 'zinc-400'`
 - Style keywords can be applied to anchor, connections, concepts, edges, and relations
-- When style keywords are used on a list container (e.g. `connections`), they set defaults for all children; per-item overrides win
+- When style keywords are used on a list container (e.g. `connections`), they set defaults for all children; per-item overrides win. Do not add `{}` directly after the closing `]` of `connections`, `concepts`, or `relations` — style keywords or the next function in the program provide the continuation value. Only include `{}` after `]` when the collection is at the end of the program (e.g. `] {}..`)
 - Default node shape is a rounded rectangle (`"md"`); use `rounded 'full'` for circles
 - Relation styles (`bg`, `color`, `border`, `rounded`) apply to the tray badge and carry through to the edge label when placed
 - Assessment green/red overrides custom `bg` when active; custom `bg` shows in neutral state only

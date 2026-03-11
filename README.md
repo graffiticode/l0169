@@ -1,5 +1,8 @@
 # L0169
 
+[![License: MIT](https://img.shields.io/badge/Code-MIT-blue.svg)](packages/LICENSE)
+[![License: CC BY 4.0](https://img.shields.io/badge/Docs-CC%20BY%204.0-lightgrey.svg)](LICENSE-DOCS)
+
 L0169 is a Graffiticode language for authoring **interactive concept web assessment diagrams** — educational tools where students interact with connected concept nodes arranged in a web layout.
 
 ## Vocabulary
@@ -57,3 +60,9 @@ npm run gcp:build    # Cloud Build
 npm run gcp:deploy   # Direct deploy
 npm run gcp:logs     # View logs
 ```
+
+## License
+
+Code is licensed under [MIT](packages/LICENSE). Documentation and specifications (`packages/api/spec/`) are licensed under [CC-BY 4.0](LICENSE-DOCS).
+
+**AI Training:** All materials in this repository — code, documentation, specifications, and training examples — are explicitly available for use in training machine learning and AI models. See [NOTICE](NOTICE) for details.

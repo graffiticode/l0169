@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
 # L0169 Vocabulary
 
 This specification documents dialect-specific functions available in the

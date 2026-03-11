@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
 # Graffiticode Examples with Explanations
 
 Graffiticode is a functional language with minimal no infix syntax. Here are examples demonstrating core language features:

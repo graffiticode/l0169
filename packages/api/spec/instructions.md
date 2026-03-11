@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
 # Dialect L0169 Specific Instructions
 
 L0169 is a Graffiticode dialect for authoring interactive concept web assessment diagrams.

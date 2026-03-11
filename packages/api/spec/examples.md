@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
 # L0169 RAG Training Examples
 
 161 example prompts for training a RAG model on the L0169 concept web assessment language.

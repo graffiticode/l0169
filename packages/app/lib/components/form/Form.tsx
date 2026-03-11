@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import "../../index.css";
 import { useState, useEffect } from "react";
 

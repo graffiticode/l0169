@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";

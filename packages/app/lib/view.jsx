@@ -113,7 +113,7 @@ export const View = () => {
   }, [JSON.stringify(state.data)]);
 
   const getDataResp = useSWR(
-    doGetData && accessToken && id && {
+    doGetData && id && {
       accessToken,
       id,
     },

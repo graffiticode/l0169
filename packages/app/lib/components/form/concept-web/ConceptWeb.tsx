@@ -772,7 +772,6 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                 style={{
                   width: "100%",
                   height: "100%",
-                  borderRadius: itemRounded,
                   objectFit: "cover",
                 }}
                 draggable={false}
@@ -1243,7 +1242,6 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                     style={{
                       width: "100%",
                       height: "100%",
-                      borderRadius: dropRounded || `${6 * scale}px`,
                       objectFit: "cover",
                     }}
                     draggable={false}
@@ -1417,7 +1415,6 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                     style={{
                       width: "100%",
                       height: "100%",
-                      borderRadius: nodeRounded,
                       objectFit: "cover",
                     }}
                     draggable={false}

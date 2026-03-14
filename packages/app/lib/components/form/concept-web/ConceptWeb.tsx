@@ -755,7 +755,8 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
               width: nodeSize * 0.75,
               height: nodeSize * 0.75,
               fontSize: `${fontSize * 0.75}rem`,
-              padding: `${3 * scale}px`,
+              padding: item.image ? 0 : `${3 * scale}px`,
+              overflow: "hidden",
               borderRadius: itemRounded,
               background: isPlaced ? placedBg : (itemBg || defaultBg),
               color: isPlaced ? placedColor : (itemColor || defaultColor),
@@ -769,8 +770,8 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                 src={item.image}
                 alt={item.text || item.value || ""}
                 style={{
-                  width: nodeSize * 0.75 * 0.75,
-                  height: nodeSize * 0.75 * 0.75,
+                  width: "100%",
+                  height: "100%",
                   borderRadius: itemRounded,
                   objectFit: "cover",
                 }}
@@ -824,9 +825,10 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
             onDragStart={(e) => handleRelationTrayDragStart(e, index, item)}
             className="inline-flex items-center justify-center font-medium cursor-grab select-none"
             style={{
-              padding: `${4 * scale}px ${10 * scale}px`,
+              padding: item.image ? 0 : `${4 * scale}px ${10 * scale}px`,
               fontSize: `${fontSize * 0.75}rem`,
               borderRadius: itemRounded,
+              overflow: "hidden",
               background: isPlaced ? placedBg : (itemBg || defaultBg),
               color: isPlaced ? placedColor : (itemColor || defaultColor),
               border: itemBorder ? `${Math.max(1, strokeWidth)}px solid ${isPlaced ? (isDark ? "#52525b" : "#d1d5db") : itemBorder}` : "none",
@@ -839,7 +841,7 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                 src={item.image}
                 alt={item.text || item.value || ""}
                 style={{
-                  maxHeight: nodeSize * 0.3,
+                  height: nodeSize * 0.3,
                   objectFit: "cover",
                 }}
                 draggable={false}
@@ -1225,6 +1227,7 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                     border: `${strokeWidth}px ${hasPlacedRelation ? "solid" : "dashed"} ${isHovered ? (isDark ? "#4ade80" : "#22c55e") : dropBorderColor}`,
                     background: bgColor,
                     boxShadow: isHovered ? `0 0 ${8 * scale}px ${isDark ? "rgba(74,222,128,0.3)" : "rgba(34,197,94,0.25)"}` : "none",
+                    overflow: "hidden",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -1238,8 +1241,9 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                     src={displayImage}
                     alt={displayLabel}
                     style={{
-                      maxWidth: imgSize * 0.7,
-                      maxHeight: imgSize * 0.7,
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: dropRounded || `${6 * scale}px`,
                       objectFit: "cover",
                     }}
                     draggable={false}
@@ -1402,7 +1406,8 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                   cursor: hasPlacedItem ? "grab" : (canReposition ? "grab" : "default"),
                   userSelect: "none",
                   zIndex: 10,
-                  padding: `${4 * scale}px`,
+                  padding: displayImage ? 0 : `${4 * scale}px`,
+                  overflow: "hidden",
                 }}
               >
                 {displayImage ? (
@@ -1410,8 +1415,8 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                     src={displayImage}
                     alt={displayText}
                     style={{
-                      maxWidth: nw * 0.7,
-                      maxHeight: nh * 0.7,
+                      width: "100%",
+                      height: "100%",
                       borderRadius: nodeRounded,
                       objectFit: "cover",
                     }}

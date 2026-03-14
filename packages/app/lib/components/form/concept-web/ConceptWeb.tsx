@@ -624,7 +624,13 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
         groups.set(sig, group);
       }
       group.keys.push(key);
-      group.expected.push(data.assess.expected);
+      // Build composite key: concept expected value + incident assessed edge relation values
+      const incidentRelations = resolvedEdges
+        .filter(re => re.fromKey === key || re.toKey === key)
+        .filter(re => re.assess?.method === "value")
+        .map(re => re.assess!.expected);
+      const composite = [data.assess.expected, ...incidentRelations].join("||");
+      group.expected.push(composite);
     }
     return groups;
   };
@@ -634,18 +640,29 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
   const unmatchedKeys = new Set<string>();
   const assessGroups = buildAssessGroups();
   for (const [, group] of assessGroups) {
-    // Collect placed values for each key in the group
+    // Collect placed composite values for each key in the group
     const placedByKey: Record<string, string | undefined> = {};
     for (const key of group.keys) {
+      let conceptValue: string | undefined;
       if (hasItems && placedItems[key] !== undefined) {
-        placedByKey[key] = items[placedItems[key]]?.value || "";
+        conceptValue = items[placedItems[key]]?.value || "";
       } else {
         // Use the node's own value if it has one (scores on init)
         const data = key === "anchor" ? anchor : connections[parseInt(key)];
-        if (data?.value) {
-          placedByKey[key] = data.value;
-        }
+        if (data?.value) conceptValue = data.value;
       }
+      if (conceptValue === undefined) continue;
+
+      // Collect placed relation values on incident assessed edges
+      const incidentRelations = resolvedEdges
+        .map((re, i) => ({ re, i }))
+        .filter(({ re }) => re.fromKey === key || re.toKey === key)
+        .filter(({ re }) => re.assess?.method === "value")
+        .map(({ i }) => {
+          const relIdx = placedRelations[i];
+          return relIdx !== undefined ? (relations[relIdx]?.value || "") : "";
+        });
+      placedByKey[key] = [conceptValue, ...incidentRelations].join("||");
     }
 
     // Build pool of remaining expected values for bipartite matching
@@ -664,7 +681,8 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
     }
   }
 
-  // Edge assessment scoring — which edges are matched (green) or unmatched (red)
+  // Edge assessment scoring — derive from node composite matching.
+  // An edge relation is correct (green) only if its incident node's composite matched.
   const matchedEdges = new Set<number>();
   const unmatchedEdges = new Set<number>();
   if (hasRelations) {
@@ -673,10 +691,13 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
       if (!edge.assess || edge.assess.method !== "value") continue;
       const relationIdx = placedRelations[i];
       if (relationIdx === undefined) continue;
-      const placedValue = relations[relationIdx]?.value || "";
-      if (placedValue === edge.assess.expected) {
+      // Find the assessed node incident to this edge
+      const incidentKey = [edge.fromKey, edge.toKey].find(
+        k => matchedKeys.has(k) || unmatchedKeys.has(k)
+      );
+      if (incidentKey && matchedKeys.has(incidentKey)) {
         matchedEdges.add(i);
-      } else {
+      } else if (incidentKey && unmatchedKeys.has(incidentKey)) {
         unmatchedEdges.add(i);
       }
     }

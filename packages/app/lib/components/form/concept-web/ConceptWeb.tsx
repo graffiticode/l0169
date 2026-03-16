@@ -624,7 +624,13 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
         groups.set(sig, group);
       }
       group.keys.push(key);
-      group.expected.push(data.assess.expected);
+      // Build composite key: concept expected value + incident assessed edge relation values
+      const incidentRelations = resolvedEdges
+        .filter(re => re.fromKey === key || re.toKey === key)
+        .filter(re => re.assess?.method === "value")
+        .map(re => re.assess!.expected);
+      const composite = [data.assess.expected, ...incidentRelations].join("||");
+      group.expected.push(composite);
     }
     return groups;
   };
@@ -634,18 +640,29 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
   const unmatchedKeys = new Set<string>();
   const assessGroups = buildAssessGroups();
   for (const [, group] of assessGroups) {
-    // Collect placed values for each key in the group
+    // Collect placed composite values for each key in the group
     const placedByKey: Record<string, string | undefined> = {};
     for (const key of group.keys) {
+      let conceptValue: string | undefined;
       if (hasItems && placedItems[key] !== undefined) {
-        placedByKey[key] = items[placedItems[key]]?.value || "";
+        conceptValue = items[placedItems[key]]?.value || "";
       } else {
         // Use the node's own value if it has one (scores on init)
         const data = key === "anchor" ? anchor : connections[parseInt(key)];
-        if (data?.value) {
-          placedByKey[key] = data.value;
-        }
+        if (data?.value) conceptValue = data.value;
       }
+      if (conceptValue === undefined) continue;
+
+      // Collect placed relation values on incident assessed edges
+      const incidentRelations = resolvedEdges
+        .map((re, i) => ({ re, i }))
+        .filter(({ re }) => re.fromKey === key || re.toKey === key)
+        .filter(({ re }) => re.assess?.method === "value")
+        .map(({ i }) => {
+          const relIdx = placedRelations[i];
+          return relIdx !== undefined ? (relations[relIdx]?.value || "") : "";
+        });
+      placedByKey[key] = [conceptValue, ...incidentRelations].join("||");
     }
 
     // Build pool of remaining expected values for bipartite matching
@@ -664,7 +681,8 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
     }
   }
 
-  // Edge assessment scoring — which edges are matched (green) or unmatched (red)
+  // Edge assessment scoring — derive from node composite matching.
+  // An edge relation is correct (green) only if its incident node's composite matched.
   const matchedEdges = new Set<number>();
   const unmatchedEdges = new Set<number>();
   if (hasRelations) {
@@ -673,10 +691,13 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
       if (!edge.assess || edge.assess.method !== "value") continue;
       const relationIdx = placedRelations[i];
       if (relationIdx === undefined) continue;
-      const placedValue = relations[relationIdx]?.value || "";
-      if (placedValue === edge.assess.expected) {
+      // Find the assessed node incident to this edge
+      const incidentKey = [edge.fromKey, edge.toKey].find(
+        k => matchedKeys.has(k) || unmatchedKeys.has(k)
+      );
+      if (incidentKey && matchedKeys.has(incidentKey)) {
         matchedEdges.add(i);
-      } else {
+      } else if (incidentKey && unmatchedKeys.has(incidentKey)) {
         unmatchedEdges.add(i);
       }
     }
@@ -734,7 +755,8 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
               width: nodeSize * 0.75,
               height: nodeSize * 0.75,
               fontSize: `${fontSize * 0.75}rem`,
-              padding: `${3 * scale}px`,
+              padding: item.image ? 0 : `${3 * scale}px`,
+              overflow: "hidden",
               borderRadius: itemRounded,
               background: isPlaced ? placedBg : (itemBg || defaultBg),
               color: isPlaced ? placedColor : (itemColor || defaultColor),
@@ -748,9 +770,8 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                 src={item.image}
                 alt={item.text || item.value || ""}
                 style={{
-                  width: nodeSize * 0.75 * 0.75,
-                  height: nodeSize * 0.75 * 0.75,
-                  borderRadius: itemRounded,
+                  width: "100%",
+                  height: "100%",
                   objectFit: "cover",
                 }}
                 draggable={false}
@@ -803,9 +824,10 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
             onDragStart={(e) => handleRelationTrayDragStart(e, index, item)}
             className="inline-flex items-center justify-center font-medium cursor-grab select-none"
             style={{
-              padding: `${4 * scale}px ${10 * scale}px`,
+              padding: item.image ? 0 : `${4 * scale}px ${10 * scale}px`,
               fontSize: `${fontSize * 0.75}rem`,
               borderRadius: itemRounded,
+              overflow: "hidden",
               background: isPlaced ? placedBg : (itemBg || defaultBg),
               color: isPlaced ? placedColor : (itemColor || defaultColor),
               border: itemBorder ? `${Math.max(1, strokeWidth)}px solid ${isPlaced ? (isDark ? "#52525b" : "#d1d5db") : itemBorder}` : "none",
@@ -818,7 +840,7 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                 src={item.image}
                 alt={item.text || item.value || ""}
                 style={{
-                  maxHeight: nodeSize * 0.3,
+                  height: nodeSize * 0.3,
                   objectFit: "cover",
                 }}
                 draggable={false}
@@ -1204,6 +1226,7 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                     border: `${strokeWidth}px ${hasPlacedRelation ? "solid" : "dashed"} ${isHovered ? (isDark ? "#4ade80" : "#22c55e") : dropBorderColor}`,
                     background: bgColor,
                     boxShadow: isHovered ? `0 0 ${8 * scale}px ${isDark ? "rgba(74,222,128,0.3)" : "rgba(34,197,94,0.25)"}` : "none",
+                    overflow: "hidden",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -1217,8 +1240,8 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                     src={displayImage}
                     alt={displayLabel}
                     style={{
-                      maxWidth: imgSize * 0.7,
-                      maxHeight: imgSize * 0.7,
+                      width: "100%",
+                      height: "100%",
                       objectFit: "cover",
                     }}
                     draggable={false}
@@ -1381,7 +1404,8 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                   cursor: hasPlacedItem ? "grab" : (canReposition ? "grab" : "default"),
                   userSelect: "none",
                   zIndex: 10,
-                  padding: `${4 * scale}px`,
+                  padding: displayImage ? 0 : `${4 * scale}px`,
+                  overflow: "hidden",
                 }}
               >
                 {displayImage ? (
@@ -1389,9 +1413,8 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                     src={displayImage}
                     alt={displayText}
                     style={{
-                      maxWidth: nw * 0.7,
-                      maxHeight: nh * 0.7,
-                      borderRadius: nodeRounded,
+                      width: "100%",
+                      height: "100%",
                       objectFit: "cover",
                     }}
                     draggable={false}

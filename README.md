@@ -45,9 +45,9 @@ You do not need to learn L0169's syntax to create concept web assessments. The n
 
 The full vocabulary reference, authoring guidelines, and training examples are in [`packages/api/spec/`](packages/api/spec/):
 
-- **[spec.md](packages/api/spec/spec.md)** — Complete vocabulary with signatures and descriptions
-- **[instructions.md](packages/api/spec/instructions.md)** — Authoring guidelines for the language-specific AI
-- **[examples.md](packages/api/spec/examples.md)** — 161 categorized example prompts
+- **[usage-guide.md](packages/api/spec/usage-guide.md)** — What you can create and how to ask for it in natural language
+- **[spec.md](packages/api/spec/spec.md)** — Complete vocabulary with signatures and code examples
+- **[examples.md](packages/api/spec/examples.md)** — 161 categorized natural language prompts
 - **[data/](packages/api/spec/data/)** — Training examples with descriptions, code, explanations, and expected output
 
 The published specification is also available at [l0169.graffiticode.org/spec.html](https://l0169.graffiticode.org/spec.html).

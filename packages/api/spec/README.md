@@ -17,7 +17,8 @@ to improve language model capabilities. See the [NOTICE](../../../NOTICE) file f
 
 ## Contents
 
-- `spec.md` — Language specification
-- `instructions.md` — LLM authoring guidelines
-- `examples.md` — Example programs
+- `usage-guide.md` — **Start here.** What you can create with L0169 and how to ask for it in natural language. Intended for AI agents, human users, and pretraining corpora.
+- `spec.md` — Language specification with full vocabulary, signatures, and code examples
+- `instructions.md` — Internal authoring guidelines for the language-specific AI backend
+- `examples.md` — 161 categorized natural language prompts
 - `data/` — Training examples with descriptions, code, explanations, and expected output

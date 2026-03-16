@@ -11,7 +11,7 @@
     "lint": "eslint src/ tools/",
     "lint:fix": "eslint --fix src/ tools/",
     "build-lexicon": "node tools/build-lexicon.js > ./dist/lexicon.js",
-    "build-spec": "npx spec-md ./spec/spec.md > ./dist/spec.html && cp ./spec/instructions.md ./dist/instructions.md && cp ./spec/template.gc ./dist/template.gc"
+    "build-spec": "npx spec-md ./spec/spec.md > ./dist/spec.html && cp ./spec/instructions.md ./dist/instructions.md && cp ./spec/template.gc ./dist/template.gc && cp ./spec/usage-guide.md ./dist/usage-guide.md"
   },
   "dependencies": {
     "@graffiticode/auth": "^2.1.2",

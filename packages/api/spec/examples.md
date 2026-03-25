@@ -213,19 +213,19 @@
 149. Create a concept web with styled nodes, custom edges, assessment, and a concepts tray — combining styling with existing features.
 150. Create a fully featured concept web with topic, instructions, dark theme, a circular styled anchor, rectangular styled connections with container defaults, custom edges, assessed nodes, a concepts tray with styled items, and a relations tray with styled labels.
 
-## Category 21: Styling — Additional Rounded Presets and Gaps (151–157) *
+## Category 21: Styling — Additional Rounded Presets and Gaps (151–157)
 
-151. Create a concept web with an anchor using rounded 'xl' for extra-large border radius. *
-152. Create a concept web with an anchor using a raw CSS rounded value like '50% / 25%' for custom border radius. *
-153. Create a concept web with an anchor using rounded 'sm' for small border radius. *
-154. Create a concept web where the relations list has bg, color, and border defaults applied to all relation children. *
-155. Create a concept web where the edges list has style defaults applied to all edge children. *
-156. Create a concept web with a relation that uses bg, color, and border together for full styling. *
-157. Create a concept web where relation styles (bg, color, border) carry through to the edge label when placed. *
+151. Create a concept web with an anchor using rounded 'xl' for extra-large border radius.
+152. Create a concept web with an anchor using a raw CSS rounded value like '50% / 25%' for custom border radius.
+153. Create a concept web with an anchor using rounded 'sm' for small border radius.
+154. Create a concept web where the relations list has bg, color, and border defaults applied to all relation children.
+155. Create a concept web where the edges list has style defaults applied to all edge children.
+156. Create a concept web with a relation that uses bg, color, and border together for full styling.
+157. Create a concept web where relation styles (bg, color, border) carry through to the edge label when placed.
 
-## Category 22: Styling — Cross-Feature Interactions (158–161) *
+## Category 22: Styling — Cross-Feature Interactions (158–161)
 
-158. Create a concept web where nodes have custom bg colors and assessment is active, showing that green/red assessment overrides the custom bg. *
-159. Create a concept web with bg and color applied to concepts in the tray. *
-160. Create a concept web where the relations list has style defaults but one relation overrides with its own bg. *
-161. Create a concept web where the concepts list, connections list, and relations list each have different container-level style defaults. *
+158. Create a concept web where nodes have custom bg colors and assessment is active, showing that green/red assessment overrides the custom bg.
+159. Create a concept web with bg and color applied to concepts in the tray.
+160. Create a concept web where the relations list has style defaults but one relation overrides with its own bg.
+161. Create a concept web where the concepts list, connections list, and relations list each have different container-level style defaults.

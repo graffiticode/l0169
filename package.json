@@ -8,7 +8,7 @@
   "scripts": {
     "update-lang-id": "find packages -type f -name \"*.js\" -o -name \"*.jsx\" -o -name \"*.ts\" -o -name \"*.tsx\" -o -name \"*.json\" -o -name \"*.md\" -o -name \"*.html\" | xargs grep -l \"0169\" | xargs sed -i '' 's/0169/0169/g'",
     "build": "npm run -w packages/app build && npm run -w packages/api build && npm run build-static",
-    "build-static": "npm run -w packages/api build-lexicon; npm run -w packages/api build-spec",
+    "build-static": "npm run -w packages/api build-lexicon; npm run -w packages/api build-spec; npm run -w packages/api build-instructions",
     "dev": "npm run -w packages/api dev",
     "start": "npm run -w packages/api start",
     "lint": "eslint test/",

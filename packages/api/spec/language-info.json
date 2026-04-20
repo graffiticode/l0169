@@ -1,0 +1,46 @@
+{
+  "id": "0169",
+  "description": "Authors interactive concept web assessments from natural language. Produces radial diagrams with a central anchor, peripheral connections, customizable edges, and optional drag-and-drop interactions that grade learner placement of concepts on nodes or relation labels on edges. Supports themes, images on any element, and per-element styling. Describe the anchor, the connections, the edge styles, any tray contents, and whether nodes or edges are assessed — L0169 emits a program that renders as an interactive concept web.",
+  "supported_item_types": [
+    "concept_web",
+    "concept_web_assessment",
+    "concept_web_relation_labeling"
+  ],
+  "example_prompts": [
+    {
+      "prompt": "Create a concept web about the water cycle with the topic 'Water Cycle', a central concept of Evaporation, and connections for Condensation, Precipitation, Collection, and Transpiration.",
+      "produces": "concept_web",
+      "notes": "Names the topic, the anchor, and every connection explicitly — the backend emits a complete display-only diagram with no guesses about what the central concept is."
+    },
+    {
+      "prompt": "Create a drag-and-drop concept web about photosynthesis where all nodes are blank and students drag the correct labels from the tray, with two distractors included.",
+      "produces": "concept_web_assessment",
+      "notes": "Says 'all nodes are blank' and specifies distractor count — triggers node-assessment mode and sets tray difficulty in one sentence."
+    },
+    {
+      "prompt": "Create a concept web about cell signaling where students drag relationship labels like 'activates' and 'inhibits' onto the edges between Cell, Receptor, and Nucleus.",
+      "produces": "concept_web_relation_labeling",
+      "notes": "Names relation labels and edge endpoints explicitly — triggers relations-tray mode and skips node assessment (nodes are pre-filled)."
+    },
+    {
+      "prompt": "Create a concept web assessment with five connections. Put the correct answers plus two distractors in the tray. Align the tray to the left.",
+      "produces": "concept_web_assessment",
+      "notes": "Specifies connection count, distractor count, and tray placement in one breath — removes three follow-up questions the backend would otherwise need to ask."
+    },
+    {
+      "prompt": "Create a fully featured concept web with the topic 'Ecosystem Interactions', markdown instructions, a dark theme, a circular indigo anchor with white text, four assessed connections with a right-aligned concepts tray, and three assessed edges with a bottom-aligned relations tray plus one distractor relation.",
+      "produces": "concept_web_relation_labeling",
+      "notes": "Exercises the full surface: theme, per-element styling, independent tray positioning for concepts and relations, and combined node + edge assessment. The canonical 'show me everything' example."
+    },
+    {
+      "prompt": "Create a concept web with dashed-arrow edges from the center to all connections and a peer-to-peer dashed edge between Condensation and Precipitation labeled 'leads to'.",
+      "produces": "concept_web",
+      "notes": "Names edge style, direction (arrows), and a peer-to-peer edge with a midpoint label — covers the custom-edges surface without triggering assessment."
+    },
+    {
+      "prompt": "Create a concept web about the solar system with the Sun at the center and planet images on each connection.",
+      "produces": "concept_web",
+      "notes": "Requests image-based connections — the backend wires image elements onto nodes rather than text labels."
+    }
+  ]
+}

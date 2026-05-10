@@ -6,9 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Development
 - **Start dev server**: `npm run dev` (API on port 50169 with Firestore emulator)
-- **Build all**: `npm run build` (builds app, API, lexicon, and spec)
-- **Build lexicon**: `cd packages/api && npm run build-lexicon`
-- **Build spec**: `cd packages/api && npm run build-spec`
+- **Build all**: `npm run build` — builds the app and API, then runs `build-static` (lexicon, spec, instructions, language-info) into `packages/api/dist/`
+- **Build static assets individually** (from `packages/api/`): `npm run build-lexicon`, `npm run build-spec`, `npm run build-instructions`, `npm run build-language-info`
 
 ### Testing
 - Tests use Jest with `@jest/globals` imports; test files are colocated as `*.spec.js` in `packages/api/src/`
@@ -59,19 +58,26 @@ Extends `@graffiticode/basis` with L0169-specific `Checker` and `Transformer` cl
 | `theme` | 2 | UI theme (`DARK` or `LIGHT` tag) |
 | `concepts` | 2 | List of drag-and-drop tray concepts |
 | `concept` | 1 | Single tray concept |
-| `image` | 2 | Image URL for a tray concept or edge label |
+| `relations` | 2 | List of drag-and-drop tray relation labels (for edges) |
+| `relation` | 1 | Single tray relation label |
+| `image` | 2 | Image URL for a node, tray concept/relation, or edge label |
 | `align` | 2 | Tray position: `RIGHT`, `LEFT`, `TOP`, `BOTTOM` |
 | `edges` | 2 | List of custom edge definitions |
 | `edge` | 1 | Single edge definition |
 | `from` | 2 | Edge source node(s) by value string, `'*'` for all |
 | `to` | 2 | Edge target node(s) by value string, `'*'` for all |
 | `type` | 2 | Edge type: `solid`, `dashed`, `solid-arrow`, `dashed-arrow` |
+| `w` / `h` | 2 | Node dimensions in Tailwind spacing units |
+| `rounded` | 2 | Border radius preset (`none`, `sm`, `md`, `lg`, `xl`, `full`, …) |
+| `bg` / `color` / `border` | 2 | Background, text, and border colors using Tailwind color names |
 
 The `Transformer.PROG` method assembles a `conceptWeb` data structure with topic, instructions, anchor, connections, edges, concepts, and trayAlign. When no `edges` keyword is used, the frontend defaults to solid edges from the anchor to each connection.
 
-**Spec files** (`packages/api/spec/`) — `spec.md` is the language specification, `instructions.md` provides LLM authoring guidelines, `template.gc` is an example program. These are built into `dist/` and served by the API.
+**Spec files** (`packages/api/spec/`) — `spec.md` is the language specification (rendered to `spec.html` via `spec-md`), `instructions.md` provides LLM authoring guidelines, `usage-guide.md` documents what L0169 can create, `examples.md` lists categorized natural-language prompts, `language-info.json` is the MCP-server descriptor, and `template.gc` is an example program. The `build-static` script copies/renders these into `packages/api/dist/` to be served by the API.
 
 **Training data** (`packages/api/spec/data/`) — `training_examples.json` contains example programs with description, code, explanation, and expected output. Used for LLM training and validation.
+
+**API routes** (`packages/api/src/routes/`) — `compile.js` (compile a program), `auth.js` (auth proxy), `config.js` (env/config), `root.js` (static dist serving). Wired together in `src/app.js`; `src/main.js` is the server entrypoint.
 
 ### Frontend (packages/app/lib/)
 

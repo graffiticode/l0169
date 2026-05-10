@@ -53,15 +53,15 @@ Extends `@graffiticode/basis` with L0169-specific `Checker` and `Transformer` cl
 | `value` | 2 | Scoring value (default display text) |
 | `text` | 2 | Display text override for node or concept |
 | `assess` | 2 | Assessment config (pipeline of method + expected) |
-| `method` | 1 | Assessment method (`'value'` or `VALUE` tag) |
+| `method` | 1 | Assessment method (string `'value'`) |
 | `expected` | 1 | Expected correct value |
-| `theme` | 2 | UI theme (`DARK` or `LIGHT` tag) |
+| `theme` | 2 | UI theme: `'dark'` or `'light'` |
 | `concepts` | 2 | List of drag-and-drop tray concepts |
 | `concept` | 1 | Single tray concept |
 | `relations` | 2 | List of drag-and-drop tray relation labels (for edges) |
 | `relation` | 1 | Single tray relation label |
 | `image` | 2 | Image URL for a node, tray concept/relation, or edge label |
-| `align` | 2 | Tray position: `RIGHT`, `LEFT`, `TOP`, `BOTTOM` |
+| `align` | 2 | Tray position: `'right'`, `'left'`, `'top'`, `'bottom'` |
 | `edges` | 2 | List of custom edge definitions |
 | `edge` | 1 | Single edge definition |
 | `from` | 2 | Edge source node(s) by value string, `'*'` for all |

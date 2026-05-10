@@ -33,7 +33,7 @@
 20. Create a concept web with an anchor that uses both value and text where text differs from value.
 21. Create a concept web with an anchor that has assessment expecting a specific value.
 22. Create a concept web with an anchor with text set to empty string for drag-and-drop.
-23. Create a concept web with an anchor using method VALUE tag instead of string 'value'.
+23. Create a concept web with an anchor using `method 'value'` and an explicit expected value.
 24. Create a concept web with an anchor assessed with method 'value' and an expected value.
 25. Create a concept web where the anchor has a value, display text override, and assessment.
 

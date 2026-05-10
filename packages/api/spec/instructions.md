@@ -24,9 +24,9 @@ L0169 is a Graffiticode dialect for authoring interactive concept web assessment
 - Use `text` to override display text for a node or concept
 - Use `image` to set an image URL on a concept, connection, or anchor: `concept value 'Hub' image 'https://...' {}`
 - Use `assess` with `method` and `expected` to define assessment criteria
-- Use `theme` to set the visual theme: `theme DARK` or `theme LIGHT`
+- Use `theme` to set the visual theme: `theme 'dark'` or `theme 'light'`
 - Use `concepts` with a list of `concept` definitions to create a drag-and-drop tray
-- Use `align` to position the tray: `align RIGHT`, `align LEFT`, `align TOP`, or `align BOTTOM`
+- Use `align` to position the tray: `align 'right'`, `align 'left'`, `align 'top'`, or `align 'bottom'`
 - When using concepts, set node `text` to empty string `''` so students drag concepts to fill them in
 - Use `relations` with a list of `relation` definitions to create a drag-and-drop tray for edge labels
 - Use `align` after `relations` to position the relations tray independently from the concepts tray
@@ -79,7 +79,7 @@ edges [
 relations [
   relation value 'activates' {},
   relation value 'signals' {}
-] align BOTTOM {}..
+] align 'bottom' {}..
 ```
 
 Relations with display overrides:
@@ -88,7 +88,7 @@ Relations with display overrides:
 relations [
   relation value 'causes' text 'Causes →' {},
   relation value 'inhibits' image 'https://...' {}
-] align BOTTOM {}
+] align 'bottom' {}
 ```
 
 Styled relations with custom colors:
@@ -97,7 +97,7 @@ Styled relations with custom colors:
 relations [
   relation value 'activates' bg 'green-100' color 'green-800' {},
   relation value 'inhibits' bg 'red-100' color 'red-800' {}
-] align BOTTOM {}
+] align 'bottom' {}
 ```
 
 ## Node Styling
@@ -126,9 +126,9 @@ Each concept web program defines:
 - **connections**: peripheral concept nodes arranged radially around the anchor
 - **concepts**: (optional) drag-and-drop tray concepts that students place onto nodes
 - **relations**: (optional) drag-and-drop tray labels that students place onto edges
-- **align**: (optional) tray position — `RIGHT` (default), `LEFT`, `TOP`, `BOTTOM`
+- **align**: (optional) tray position — `'right'` (default), `'left'`, `'top'`, `'bottom'`
 - **edges**: (optional) custom edge definitions; when omitted, solid edges connect anchor to all connections
-- **theme**: `LIGHT` or `DARK` visual theme
+- **theme**: `'light'` or `'dark'` visual theme
 
 When no `edges` keyword is used, the compiler automatically generates solid
 edges from each connection to the anchor. Use `edges` for custom edge rendering.
@@ -180,7 +180,7 @@ connections [
 concepts [
   concept value 'Hub' {},
   concept value 'Spoke' {}
-] align RIGHT {}..
+] align 'right' {}..
 ```
 
 A concept with an image that scores by value:
@@ -189,7 +189,7 @@ A concept with an image that scores by value:
 concepts [
   concept value 'Hub' image 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Circle_-_black_simple.svg/120px-Circle_-_black_simple.svg.png' {},
   concept value 'Spoke' image 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Solar_system.jpg/120px-Solar_system.jpg' {}
-] align RIGHT {}
+] align 'right' {}
 ```
 
 ## Using Images

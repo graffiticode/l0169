@@ -21,13 +21,13 @@ semantics and base library can be found here:
 | `value` | `<string record: record>` | Sets the scoring value (default display text) |
 | `text` | `<string record: record>` | Overrides display text for a node |
 | `assess` | `<list record: record>` | Sets assessment config for a node |
-| `method` | `<string\|VALUE: record>` | Sets the assessment method |
+| `method` | `<string: record>` | Sets the assessment method |
 | `expected` | `<string: record>` | Sets the expected correct value |
-| `theme` | `<[DARK\|LIGHT] record: record>` | Sets the UI theme |
+| `theme` | `<string record: record>` | Sets the UI theme: `'dark'` or `'light'` |
 | `concepts` | `<list record: record>` | Defines a list of tray concepts for drag-and-drop |
 | `concept` | `<record: record>` | Defines a single tray concept (arity 1) |
 | `image` | `<string record: record>` | Sets an image URL for a tray item |
-| `align` | `<[RIGHT\|LEFT\|TOP\|BOTTOM] record: record>` | Sets tray position relative to diagram |
+| `align` | `<string record: record>` | Sets tray position: `'right'`, `'left'`, `'top'`, or `'bottom'` |
 | `edges` | `<list record: record>` | Defines a list of edge definitions |
 | `edge` | `<record: record>` | Defines a single edge (arity 1) |
 | `from` | `<string\|list record: record>` | Sets the source node(s) by value string |
@@ -140,12 +140,10 @@ assess [method 'value' expected 'Hub']
 
 ### method
 
-Sets the assessment method. Accepts either the string `'value'` or the tag
-`VALUE`. Both are normalized to the string `"value"` in the compiled output.
+Sets the assessment method. Accepts the string `'value'`.
 
 ```
 method 'value'
-method VALUE
 ```
 
 ### expected
@@ -168,7 +166,7 @@ in the program provide the continuation value.
 concepts [
   concept text 'Answer A' {},
   concept text 'Answer B' {}
-] align RIGHT {}
+] align 'right' {}
 ```
 
 ### concept
@@ -191,11 +189,11 @@ concept image 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Circle_
 
 ### align
 
-Sets the tray position relative to the concept web diagram. Accepted tags:
-`RIGHT` (default), `LEFT`, `TOP`, `BOTTOM`.
+Sets the tray position relative to the concept web diagram. Accepted values:
+`'right'` (default), `'left'`, `'top'`, `'bottom'`.
 
 ```
-align RIGHT
+align 'right'
 ```
 
 ### edges
@@ -273,7 +271,7 @@ in the program provide the continuation value.
 relations [
   relation value 'causes' {},
   relation value 'inhibits' {}
-] align BOTTOM {}
+] align 'bottom' {}
 ```
 
 ### relation
@@ -352,10 +350,10 @@ border 'blue-600'
 ### theme
 
 Select a theme and render the theme toggle button to allow users to set the
-theme. The tag values `DARK` and `LIGHT` are the only accepted argument values.
+theme. The string values `'dark'` and `'light'` are the only accepted argument values.
 
 ```
-theme DARK
+theme 'dark'
 ```
 
 ## Program Examples
@@ -402,7 +400,7 @@ concepts [
   concept text 'Hub' {},
   concept text 'Foo' {},
   concept text 'Bar' {}
-] align RIGHT {}..
+] align 'right' {}..
 ```
 
 A styled concept web with custom colors and shapes:
@@ -431,7 +429,7 @@ edges [
 relations [
   relation value 'activates' bg 'green-100' color 'green-800' {},
   relation value 'inhibits' bg 'red-100' color 'red-800' {}
-] align BOTTOM {}..
+] align 'bottom' {}..
 ```
 
 A concept web with draggable relation labels on edges:
@@ -451,5 +449,5 @@ edges [
 relations [
   relation value 'activates' {},
   relation value 'signals' {}
-] align BOTTOM {}..
+] align 'bottom' {}..
 ```

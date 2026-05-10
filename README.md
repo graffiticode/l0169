@@ -75,8 +75,8 @@ The published specification is also available at [l0169.graffiticode.org/spec.ht
 | `from` / `to` | Sets edge source and target nodes (supports wildcards) |
 | `type` | Sets edge type: solid, dashed, solid-arrow, dashed-arrow |
 | `image` | Attaches an image URL to a node, concept, relation, or edge |
-| `align` | Sets tray position: RIGHT, LEFT, TOP, or BOTTOM |
-| `theme` | Sets UI theme: DARK or LIGHT |
+| `align` | Sets tray position: `'right'`, `'left'`, `'top'`, or `'bottom'` |
+| `theme` | Sets UI theme: `'dark'` or `'light'` |
 | `w` / `h` | Sets node dimensions in Tailwind spacing units |
 | `rounded` | Sets border radius preset (none, sm, md, lg, xl, full, etc.) |
 | `bg` / `color` / `border` | Sets background, text, and border colors using Tailwind color names |

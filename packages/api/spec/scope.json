@@ -1,0 +1,19 @@
+{
+  "id": "0169",
+  "summary": "Authors interactive concept-web assessments — radial diagrams with a central anchor, peripheral concepts connected by edges, and optional drag-and-drop interactions that grade learner placement.",
+  "in_scope": [
+    "Radial concept-web diagrams with a central anchor and peripheral nodes",
+    "Edges connecting nodes, optionally labeled with relation terms",
+    "Drag-and-drop interactions where learners fill blank nodes or label edges from a tray",
+    "Custom node and edge styling",
+    "Display-only concept maps (no assessment surface)"
+  ],
+  "out_of_scope": [
+    "Non-radial graph layouts (hierarchical trees, timelines, Sankey, arbitrary graphs)",
+    "Free-form or multiple-choice items (MCQ, cloze, text-input) — use L0158",
+    "Flashcards, match games, memory games — use L0159",
+    "Spreadsheets, tables, formulas — use L0166",
+    "Host-app embedding (LMS or Next.js mount) — handled by the host runtime",
+    "External data ingestion (CSV, database, API)"
+  ]
+}

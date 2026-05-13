@@ -6,7 +6,8 @@
     "Edges connecting nodes, optionally labeled with relation terms",
     "Drag-and-drop interactions where learners fill blank nodes or label edges from a tray",
     "Custom node and edge styling",
-    "Display-only concept maps (no assessment surface)"
+    "Display-only concept maps (no assessment surface)",
+    "Schema-validated output suitable for hosting as a Learnosity custom question via L0158"
   ],
   "out_of_scope": [
     "Any diagram that isn't a radial concept web (mind maps with hierarchical branches, force-directed networks, flowcharts, timelines, Sankey, dependency graphs, ER diagrams)",

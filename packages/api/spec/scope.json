@@ -9,6 +9,7 @@
     "Display-only concept maps (no assessment surface)"
   ],
   "out_of_scope": [
+    "Any diagram that isn't a radial concept web (mind maps with hierarchical branches, force-directed networks, flowcharts, timelines, Sankey, dependency graphs, ER diagrams)",
     "Non-radial graph layouts (hierarchical trees, timelines, Sankey, arbitrary graphs)",
     "Free-form or multiple-choice items (MCQ, cloze, text-input) — use L0158",
     "Flashcards, match games, memory games — use L0159",

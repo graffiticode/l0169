@@ -71,8 +71,8 @@ export const Form = ({ state }) => {
       )}
     >
       {theme !== undefined && <ThemeToggle theme={theme} setTheme={setTheme} />}
-      {Array.isArray(state.data.errors) && state.data.errors.length > 0
-        ? renderErrors(state.data.errors, theme)
+      {Array.isArray(state.errors) && state.errors.length > 0
+        ? renderErrors(state.errors, theme)
         : render({state})}
     </div>
   );

@@ -24,9 +24,9 @@ L0169 is a Graffiticode dialect for authoring interactive concept web assessment
 - Use `text` to override display text for a node or concept
 - Use `image` to set an image URL on a concept, connection, or anchor: `concept value 'Hub' image 'https://...' {}`
 - Use `assess` with `method` and `expected` to define assessment criteria
-- Use `theme` to set the visual theme: `theme 'dark'` or `theme 'light'`
+- Use `theme` to set the visual theme: `theme 'dark'` or `theme 'light'`. Place it BEFORE the node it precedes so the rest of the program is its continuation and the theme is merged into the concept web: `topic 'X' theme 'dark' anchor text 'Hub' {}..`. Appending a trailing `theme 'dark' {}` after the web is already closed compiles but leaves a detached record, and the theme is not applied
 - Use `concepts` with a list of `concept` definitions to create a drag-and-drop tray
-- Use `align` to position the tray: `align 'right'`, `align 'left'`, `align 'top'`, or `align 'bottom'`
+- Use `align` to position the tray: `align 'right'`, `align 'left'`, `align 'top'`, or `align 'bottom'`. It follows the closing `]` of the tray it positions and takes the continuation: `concepts [ concept text 'A' {} ] align 'right' {}..`
 - When using concepts, set node `text` to empty string `''` so students drag concepts to fill them in
 - Use `relations` with a list of `relation` definitions to create a drag-and-drop tray for edge labels
 - Use `align` after `relations` to position the relations tray independently from the concepts tray
@@ -40,6 +40,8 @@ L0169 is a Graffiticode dialect for authoring interactive concept web assessment
 - Use `border` to set border color: `border 'zinc-400'`
 - Style keywords can be applied to anchor, connections, concepts, edges, and relations
 - When style keywords are used on a list container (e.g. `connections`), they set defaults for all children; per-item overrides win. Do not add `{}` directly after the closing `]` of `connections`, `concepts`, or `relations` — style keywords or the next function in the program provide the continuation value. Only include `{}` after `]` when the collection is at the end of the program (e.g. `] {}..`)
+- **This continuation rule applies to EVERY two-argument function, not just list containers.** `topic`, `instructions`, `theme`, `align`, `anchor`, `text`, `value`, `assess`, `from`, `to`, `type`, `w`, `h`, `rounded`, `bg`, `color`, and `border` each take their value plus a continuation. Mid-program the next function supplies it; the last function in the chain must close with `{}`, and the program ends with `..`. A two-argument function written with neither — most often a lone `theme 'dark'` appended when modifying an existing program — fails to compile with `Too few arguments for THEME. Expected 2.`
+- Only `connection`, `concept`, `edge`, `relation`, `method`, and `expected` take a single argument and are exempt
 - Default node shape is a rounded rectangle (`"md"`); use `rounded 'full'` for circles
 - Relation styles (`bg`, `color`, `border`, `rounded`) apply to the tray badge and carry through to the edge label when placed
 - Assessment green/red overrides custom `bg` when active; custom `bg` shows in neutral state only

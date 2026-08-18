@@ -42,12 +42,43 @@ semantics and base library can be found here:
 | `color` | `<string record: record>` | Sets text Tailwind color name (e.g. `"white"`) |
 | `border` | `<string record: record>` | Sets border Tailwind color name (e.g. `"zinc-400"`) |
 
+### Reading the examples
+
+Most functions here take **two** arguments — their own value and a *continuation
+record* — as their `<… record: record>` signature shows. The continuation is
+whatever comes next in the program, so mid-program a function is simply followed
+by the next one:
+
+```
+topic 'Concept Web'
+theme 'dark'
+anchor text 'Hub' {}..
+```
+
+Here `topic` takes `'Concept Web'` plus everything after it, and `theme` takes
+`'dark'` plus the `anchor` that follows. Only the **last** function in a chain
+needs an explicit `{}` to close it, and the program ends with `..`.
+
+The examples below are written as self-contained fragments, so each one closes its
+own chain with `{}`. That trailing `{}` is not part of the function's own syntax —
+drop it when the function is followed by something else. Writing a two-argument
+function with **no** continuation and no `{}` is the one thing that will not
+compile:
+
+```
+theme 'dark'          | ERROR: Too few arguments for THEME. Expected 2.
+```
+
+Note that `connection`, `concept`, `edge`, `relation`, `method`, and `expected`
+take a single argument and do not follow this rule.
+
 ### topic
 
 Sets the topic label displayed above the concept web diagram.
 
 ```
 topic 'Concept Web'
+anchor text 'Hub' {}..
 ```
 
 ### instructions
@@ -57,6 +88,7 @@ formatting for lists and emphasis.
 
 ```
 instructions 'Drag the correct concepts onto the matching nodes.'
+anchor text 'Hub' {}..
 ```
 
 Multiline with markdown:
@@ -66,6 +98,7 @@ instructions `
 - Drag concepts from the tray onto the correct nodes
 - Green means correct, red means incorrect
 `
+anchor text 'Hub' {}..
 ```
 
 ### anchor
@@ -89,7 +122,7 @@ or the next function in the program provide the continuation value.
 connections [
   connection text 'Foo' {},
   connection text 'Bar' {}
-]
+] {}
 ```
 
 With shared styles:
@@ -117,7 +150,7 @@ during assessment. Also serves as the default display text unless overridden
 by `text` or `image`.
 
 ```
-value 'Hub'
+concept value 'Hub' {}
 ```
 
 ### text
@@ -126,7 +159,8 @@ Overrides the display text for a node or concept. When set on a concept,
 the `value` is still used for scoring.
 
 ```
-text 'Hub'
+anchor text 'Hub' {}
+concept value 'Hub' text 'The Hub' {}
 ```
 
 ### assess
@@ -135,7 +169,7 @@ Sets assessment configuration for a node. Takes a list containing a single
 pipeline of `method` and `expected`.
 
 ```
-assess [method 'value' expected 'Hub']
+anchor text 'Hub' assess [method 'value' expected 'Hub'] {}
 ```
 
 ### method
@@ -193,7 +227,9 @@ Sets the tray position relative to the concept web diagram. Accepted values:
 `'right'` (default), `'left'`, `'top'`, `'bottom'`.
 
 ```
-align 'right'
+concepts [
+  concept text 'Answer A' {}
+] align 'right' {}
 ```
 
 ### edges
@@ -231,9 +267,9 @@ Sets the source node(s) for an edge. The value is matched against node
 value `'*'` means all nodes except those specified in `to`.
 
 ```
-from 'Hub'
-from ['Hub', 'Foo']
-from '*'
+edge from 'Hub' to 'Foo' {}
+edge from ['Hub', 'Foo'] to 'Bar' {}
+edge from '*' to 'Hub' {}
 ```
 
 ### to
@@ -243,9 +279,9 @@ Sets the target node(s) for an edge. The value is matched against node
 value `'*'` means all nodes except those specified in `from`.
 
 ```
-to 'Foo'
-to ['Foo', 'Bar']
-to '*'
+edge from 'Hub' to 'Foo' {}
+edge from 'Hub' to ['Foo', 'Bar'] {}
+edge from 'Hub' to '*' {}
 ```
 
 ### type
@@ -254,8 +290,8 @@ Sets the edge type. Accepted values: `'solid'` (default), `'dashed'`,
 `'solid-arrow'`, `'dashed-arrow'`.
 
 ```
-type 'solid'
-type 'dashed-arrow'
+edge from 'Hub' to '*' type 'solid' {}
+edge from 'Foo' to 'Bar' type 'dashed-arrow' {}
 ```
 
 ### relations
@@ -296,7 +332,7 @@ to anchor, connections, concepts, edges, and relations. When used on a list cont
 (e.g. `connections`), it sets the default width for all children.
 
 ```
-w 24
+anchor text 'Hub' w 24 {}
 ```
 
 ### h
@@ -304,7 +340,7 @@ w 24
 Sets the height of a node in Tailwind spacing units (1 unit = 4px).
 
 ```
-h 12
+anchor text 'Hub' w 24 h 12 {}
 ```
 
 ### rounded
@@ -315,9 +351,9 @@ Relations default to `"xs"`. Raw CSS values are also accepted as passthrough
 (e.g. `"50% / 25%"` for different horizontal/vertical radii).
 
 ```
-rounded 'lg'
-rounded 'full'
-rounded '50% / 25%'
+anchor text 'Hub' rounded 'full' {}
+connection value 'Foo' rounded 'lg' {}
+connection value 'Bar' rounded '50% / 25%' {}
 ```
 
 ### bg
@@ -325,8 +361,8 @@ rounded '50% / 25%'
 Sets the background color using a Tailwind color name.
 
 ```
-bg 'blue-500'
-bg 'indigo-100'
+anchor text 'Hub' bg 'indigo-100' {}
+connection value 'Foo' bg 'blue-500' {}
 ```
 
 ### color
@@ -334,8 +370,8 @@ bg 'indigo-100'
 Sets the text color using a Tailwind color name.
 
 ```
-color 'white'
-color 'zinc-800'
+anchor text 'Hub' color 'white' {}
+concept text 'Answer A' color 'zinc-800' {}
 ```
 
 ### border
@@ -343,8 +379,8 @@ color 'zinc-800'
 Sets the border color using a Tailwind color name.
 
 ```
-border 'zinc-400'
-border 'blue-600'
+anchor text 'Hub' border 'blue-600' {}
+connection value 'Foo' border 'zinc-400' {}
 ```
 
 ### theme
@@ -353,8 +389,15 @@ Select a theme and render the theme toggle button to allow users to set the
 theme. The string values `'dark'` and `'light'` are the only accepted argument values.
 
 ```
+topic 'Concept Web'
 theme 'dark'
+anchor text 'Hub' {}..
 ```
+
+Place `theme` before the node it precedes, so the rest of the program is its
+continuation and the theme is merged into the concept web record. Writing it as a
+trailing `theme 'dark' {}` after the web is already closed parses, but leaves a
+detached record and the theme is not applied.
 
 ## Program Examples
 

@@ -3,6 +3,7 @@ import React, { useState, useCallback, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import { twColorToHex, twSpacingToPx, twRoundedToCss } from "./tailwind-map";
+import { fitTextToBox } from "./text-measure";
 
 interface AssessConfig {
   method: string;
@@ -235,6 +236,7 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
   const hasRelations = relations.length > 0;
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [positions, setPositions] = useState<Record<string, NodePosition>>({});
   const dragging = useRef<{ id: string; offsetX: number; offsetY: number } | null>(null);
@@ -280,12 +282,15 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
     allEntries.push({ key: String(i), data: c });
   });
 
-  // Measure container and compute initial positions
+  // Measure container dimensions and available viewport space
   useEffect(() => {
     if (!containerRef.current) return;
     const observer = new ResizeObserver((entries) => {
       const { width } = entries[0].contentRect;
+
+      // With aspectRatio: 1, height is always equal to width
       const height = width;
+
       const s = width / REF_WIDTH;
       const ns = BASE_NODE_SIZE * s;
       const pd = BASE_PADDING * s;
@@ -855,13 +860,13 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
   ) : null;
 
   return (
-    <div className="flex flex-col gap-2">
+    <div ref={rootRef} className="flex flex-col gap-2 mx-auto" style={{ width: "66%", maxWidth: "800px" }}>
       {(topic || instructions) && (
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-0">
           {topic && (
             <div
-              className="text-lg font-bold text-center"
-              style={{ color: topicColor }}
+              className="font-bold text-center"
+              style={{ color: topicColor, fontSize: `${(BASE_FONT_SIZE * (size.width / REF_WIDTH) * 1.8)}rem` }}
             >
               <ReactMarkdown
                 components={{
@@ -874,8 +879,11 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
           )}
           {instructions && (
             <div
-              className="text-sm text-left font-sans"
-              style={{ color: isDark ? "#a1a1aa" : "#52525b", paddingLeft: "25%", paddingRight: "25%" }}
+              className="text-center font-sans"
+              style={{
+                color: isDark ? "#a1a1aa" : "#52525b",
+                fontSize: `${(BASE_FONT_SIZE * (size.width / REF_WIDTH) * 1.2)}rem`
+              }}
             >
               <ReactMarkdown
                 remarkPlugins={[remarkBreaks]}
@@ -903,16 +911,17 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
       >
       <div
         className="flex"
-        style={{ flexDirection: outerFlexDir as any, flex: 1 }}
+        style={{ flexDirection: outerFlexDir as any, flex: 1, justifyContent: "center", gap: 0 }}
       >
         <div
           ref={containerRef}
           style={{
             position: "relative",
-            width: "100%",
-            flex: isHorizontalLayout ? 1 : "none",
-            height: size.height || 300,
+            width: "66%",
+            maxWidth: "800px",
+            aspectRatio: "1",
             touchAction: "none",
+            marginTop: "-0.5rem",
           }}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
@@ -1381,6 +1390,15 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
             // Assessment colors override custom bg when active
             const bg = assessBg !== nodeBackground ? assessBg : nodeBg;
 
+            // Auto-shrink text to fit node
+            const nodeLabelFit = !displayImage && displayText
+              ? fitTextToBox(displayText, nw * 0.9, nh * 0.85, {
+                  maxFontSizePx: fontSize * 16,
+                  minFontSizePx: fontSize * 0.6 * 16,
+                  maxLines: 3,
+                })
+              : null;
+
             return (
               <div
                 key={key}
@@ -1423,11 +1441,14 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
                   <span
                     style={{
                       color: nodeColor,
-                      fontSize: `${fontSize}rem`,
+                      fontSize: nodeLabelFit ? `${nodeLabelFit.fontSizePx / 16}rem` : `${fontSize}rem`,
                       textAlign: "center",
                       lineHeight: 1.2,
                       overflow: "hidden",
-                      textOverflow: "ellipsis",
+                      wordWrap: "break-word",
+                      wordBreak: "break-word",
+                      maxWidth: "95%",
+                      display: "block",
                     }}
                   >
                     {displayText}

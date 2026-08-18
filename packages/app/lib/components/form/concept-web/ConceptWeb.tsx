@@ -860,7 +860,7 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
   ) : null;
 
   return (
-    <div ref={rootRef} className="flex flex-col gap-2 mx-auto" style={{ width: "66%", maxWidth: "800px" }}>
+    <div ref={rootRef} className="flex flex-col gap-2 mx-auto" style={{ width: "85%", maxWidth: "1200px" }}>
       {(topic || instructions) && (
         <div className="flex flex-col gap-0">
           {topic && (
@@ -917,8 +917,8 @@ export function ConceptWeb({ conceptWeb, theme }: ConceptWebProps) {
           ref={containerRef}
           style={{
             position: "relative",
-            width: "66%",
-            maxWidth: "800px",
+            width: "85%",
+            maxWidth: "1200px",
             aspectRatio: "1",
             touchAction: "none",
             marginTop: "-0.5rem",

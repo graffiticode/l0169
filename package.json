@@ -15,9 +15,9 @@
     "lint:fix": "eslint --fix test/",
     "pack": "rm *.tgz; npm -w packages/app pack",
     "publish": "npm -w packages/app publish",
-    "gcp:build": "gcloud builds submit --config cloudbuild.yaml --substitutions=COMMIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo 'latest')",
-    "gcp:deploy": "gcloud run deploy l0169 --source . --port 50169 --region us-central1 --platform managed --allow-unauthenticated",
-    "gcp:logs": "gcloud run logs read l0169 --region us-central1"
+    "gcp:build": "gcloud builds submit --project graffiticode --config cloudbuild.yaml --substitutions=COMMIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo 'latest')",
+    "gcp:deploy": "gcloud run deploy l0169 --project graffiticode --source . --port 50169 --region us-central1 --platform managed --allow-unauthenticated",
+    "gcp:logs": "gcloud run services logs read l0169 --project graffiticode --region us-central1"
   },
   "devDependencies": {
     "eslint": "^8.44.0",
